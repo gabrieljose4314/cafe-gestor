@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de Despesas</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+    <header>
+        <nav>
+            <h1>Painel de Gestão de cafe</h1>
+            <hr>
+            <h2 class="titulo">Gerenciamento de Despesas</h2>
+        </nav>
+    </header>
+
+    <section class="menu">
+        <details>
+            <summary><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
+</svg></summary>
+            <ul>
+                <li><a href="index.html">Painel de Gestão</a></li>
+                <li><a href="cadastro.html">Cadastro de Moita</a></li>
+                <li><a href="colheita.html">Gerenciamento de colheita</a></li>
+                <li><a href="vendas.html">Gerenciamento de Vendas</a></li>
+            </ul>
+        </details>
+    </section>
+    </section>
+
+    <section>
+        <h3>Gerenciamento de Despesas</h3>
+        <form id="gerenciamento-despesas-form">
+            <h3>Categoria da Despesa</h3>
+
+            <input type="radio" id="categoria-fertilizante" name="categoria-despesa" value="Fertilizante" required>
+            <label for="categoria-fertilizante">Fertilizantes</label><br>
+
+            <input type="radio" id="categoria-defensivo" name="categoria-despesa" value="Defensivo">
+            <label for="categoria-defensivo">Defensivo</label><br>
+        
+            <input type="radio" id="categoria-herbicidas" name="categoria-despesa" value="Herbicidas">
+            <label for="categoria-herbicidas">Herbicidas</label><br>
+
+            <input type="radio" id="categoria-mao-de-obra" name="categoria-despesa" value="Mão de Obra">
+            <label for="categoria-mao-de-obra">Mão de Obra</label><br>
+
+            <input type="radio" id="categoria-outros" name="categoria-despesa" value="Outros">
+            <label for="categoria-outros">Outros</label><br><br>
+
+            <div>
+            <label for="descricao-despesa">Descrição:</label><br>
+            <input type="text" id="descricao-despesa" name="descricao-despesa"><br><br>
+            </div>
+
+            <label for="valor-despesa">Valor:</label>
+            <input type="number" id="valor-despesa" name="valor-despesa" step="0.01" required><br><br>
+
+            <label for="data-despesa">Data da Despesa:</label>
+            <input type="date" id="data-despesa" name="data-despesa" required><br><br>
+
+            <button type="submit">Cadastrar Despesa</button>
+        </form>
+    </section>
+</body>
+</html>

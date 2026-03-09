@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de Vendas</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+    <header>
+        <nav>
+            <h1>Painel de Gestão de Vendas</h1>
+            <hr>
+            <h2 class="titulo">Gerenciamento de Vendas</h2>
+        </nav>
+    </header>
+    <section class="menu">
+        <details>
+            <summary><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
+</svg></summary>
+            <ul>
+                <li><a href="index.html">Painel de Gestão</a></li>
+                <li><a href="cadastro.html">Cadastro de Moita</a></li>
+                <li><a href="despesas.html">Gerenciamento de Despesas</a></li>
+                <li><a href="colheita.html">Gerenciamento de colheita</a></li>
+            </ul>
+        </details>
+    </section>
+
+    <section>
+        <h3>Gerenciamento de Vendas</h3>
+        <form id="gerenciamento-vendas-form">
+            <label for="moita-venda">Moita:</label>
+            <input type="text" id="moita-venda" name="moita-venda" required><br><br>
+
+            <label for="data-venda">Data da Venda:</label>
+            <input type="date" id="data-venda" name="data-venda" required><br><br>
+
+            <label for="quantidade-vendida">Quantidade Vendida (kg):</label>
+            <input type="number" id="quantidade-vendida" name="quantidade-vendida" step="0.01" required><br><br>
+
+            <label for="preco-unitario">Preço Unitário (R$):</label>
+            <input type="number" id="preco-unitario" name="preco-unitario" step="0.01" required><br><br>
+
+            <button type="submit">Registrar Venda</button>
+        </form>
+    
+</body>
+</html>

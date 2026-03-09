@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Gestão de cafe</title>
+
+    <link rel="stylesheet" href="style.css">
+    <script type="module" src="firebase.js" defer></script>
+    <script type="module" src="script.js" defer></script>
+
+</head>
+
+<body>
+    <header>
+        <nav>
+            <h1>Painel de Gestão de cafe</h1>
+            <hr>
+            <h2 class="titulo">Painel Geral</h2>
+        </nav>
+    </header>
+    <section class="menu">
+        <div class="usuario">
+            <h2 id="nomeUsuario"></h2>
+            <button id="logout">Sair</button>
+        </div>
+        <details>
+            <summary><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
+</svg></summary>
+            <ul>
+                <li><a href="cadastro.html">Cadastro de Moita</a></li>
+                <li><a href="despesas.html">Gerenciamento de Despesas</a></li>
+                <li><a href="colheita.html">Gerenciamento de colheita</a></li>
+                <li><a href="vendas.html">Gerenciamento de Vendas</a></li>
+            </ul>
+        </details>
+        
+    </section>
+
+    <section class="display-painel">
+        <div class="painel-ganho-bruto">
+        </div>
+        <div class="painel-gasto-bruto">
+        </div>
+        <div class="painel-lucro">
+        </div>
+    </section>
+</body>
+
+</html>
