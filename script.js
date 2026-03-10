@@ -40,3 +40,71 @@ botaoLogout.addEventListener("click", async () => {
   window.location.href = "login.html";
 
 });
+import {
+  collection,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+
+
+onAuthStateChanged(auth, async (user) => {
+
+  if (!user) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  let ganhoBruto = 0;
+  let gastoBruto = 0;
+
+
+  // BUSCAR VENDAS
+  const vendasSnapshot = await getDocs(
+    collection(db, "usuarios", user.uid, "vendas")
+  );
+
+  vendasSnapshot.forEach((doc) => {
+
+    const venda = doc.data();
+
+    ganhoBruto += venda.valorTotal;
+
+  });
+
+
+  // BUSCAR DESPESAS
+  const despesasSnapshot = await getDocs(
+    collection(db, "usuarios", user.uid, "despesas")
+  );
+
+  despesasSnapshot.forEach((doc) => {
+
+    const despesa = doc.data();
+
+    gastoBruto += despesa.valor;
+
+  });
+
+
+  const lucro = ganhoBruto - gastoBruto;
+
+
+  // FORMATAÇÃO BRASILEIRA
+  document.getElementById("ganho-bruto").textContent =
+    ganhoBruto.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL"
+    });
+
+  document.getElementById("gasto-bruto").textContent =
+    gastoBruto.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL"
+    });
+
+  document.getElementById("lucro-total").textContent =
+    lucro.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL"
+    });
+
+});

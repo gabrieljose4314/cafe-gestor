@@ -23,7 +23,6 @@ onAuthStateChanged(auth, (user) => {
 
     e.preventDefault();
 
-    const moita = document.getElementById("moita-venda").value;
     const data = document.getElementById("data-venda").value;
     const quantidade = document.getElementById("quantidade-vendida").value;
     const preco = document.getElementById("preco-unitario").value;
@@ -35,7 +34,6 @@ onAuthStateChanged(auth, (user) => {
       await addDoc(
         collection(db, "usuarios", user.uid, "vendas"),
         {
-          moita: moita,
           data: data,
           quantidade: Number(quantidade),
           precoUnitario: Number(preco),
