@@ -2,7 +2,8 @@ import { auth, db } from "./firebase.js";
 
 import {
   collection,
-  addDoc
+  addDoc,
+  getDocs
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
 import {
@@ -12,12 +13,41 @@ import {
 
 const formColheita = document.getElementById("gerenciamento-colheita-form");
 
+
+async function carregarMoitas(user) {
+
+  const select = document.getElementById("moita-colheita");
+
+  const snapshot = await getDocs(
+    collection(db, "usuarios", user.uid, "moitas")
+  );
+
+  snapshot.forEach((doc) => {
+
+    const moita = doc.data();
+
+    const option = document.createElement("option");
+
+    option.value = moita.nome;
+    option.textContent = moita.nome;
+
+    select.appendChild(option);
+
+  });
+
+}
+
+
 onAuthStateChanged(auth, (user) => {
 
   if (!user) {
     window.location.href = "login.html";
     return;
   }
+
+  // 🔥 CARREGA AS MOITAS NO SELECT
+  carregarMoitas(user);
+
 
   formColheita.addEventListener("submit", async (e) => {
 

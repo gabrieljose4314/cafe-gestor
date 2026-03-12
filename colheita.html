@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
     <script type="module" src="colheita.js"></script>
 
 </head>
+
 <body>
     <header>
         <nav>
@@ -19,9 +21,11 @@
     </header>
     <section class="menu">
         <details>
-            <summary><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
-  <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
-</svg></summary>
+            <summary><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor"
+                    class="bi bi-list" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd"
+                        d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5" />
+                </svg></summary>
             <ul>
                 <li><a href="index.html">Painel de Gestão</a></li>
                 <li><a href="cadastro.html">Cadastro de Moita</a></li>
@@ -36,7 +40,9 @@
         <h3>Gerenciamento de Colheita</h3>
         <form id="gerenciamento-colheita-form">
             <label for="moita-colheita">Moita:</label>
-            <input type="text" id="moita-colheita" name="moita-colheita" required><br><br>
+            <select id="moita-colheita" name="moita-colheita" required>
+                <option value="">Selecione uma moita</option>
+            </select><br><br>
 
             <label for="data-colheita">Data da Colheita:</label>
             <input type="date" id="data-colheita" name="data-colheita" required><br><br>
@@ -48,4 +54,5 @@
         </form>
     </section>
 </body>
+
 </html>
