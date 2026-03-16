@@ -1,25 +1,31 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Painel de Gestão de Café</title>
 
-    <link rel="stylesheet" href="style.css">
-    <script type="module" src="auth.js" defer></script>
-
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="auth.js" defer></script>
 </head>
 <body>
+  <main class="pagina-login">
     <section class="login-container">
-        <img class="banner" src=".\img\imagem-de-fundo.png" alt="">
-        <h2>Bem-vindo! caso ja tenha adquirido basta entrar!</h2>
-        <button  id="login-btn">Entrar com Google</button>
+      <img class="banner" src="./img/imagem-de-fundo.png" alt="Lavoura de café">
+
+      <div class="overlay-login">
+        <h2>Bem-vindo! Se você já adquiriu o sistema, entre com sua conta.</h2>
+        <button id="login-btn">Entrar com Google</button>
+      </div>
     </section>
-    <section>
-    <h3 class="txt-suporte">Caso tenha dúvidas ou queira adquirir, entre em contato:</h3>
-    <a href="https://wa.me/5531989709339" target="_blank">
-    <button id="whatsapp-btn">Suporte whatsapp</button>
-    </a>
+
+    <section class="suporte-container">
+      <h3 class="txt-suporte">Dúvidas ou interesse em adquirir?</h3>
+      <p>Entre em contato pelo WhatsApp para suporte ou mais informações.</p>
+      <a href="https://wa.me/5531989709339" target="_blank">
+        <button id="whatsapp-btn">Suporte WhatsApp</button>
+      </a>
     </section>
+  </main>
 </body>
 </html>

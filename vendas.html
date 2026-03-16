@@ -7,7 +7,6 @@
 
     <link rel="stylesheet" href="style.css">
     <script type="module" src="vendas.js"></script>
-
 </head>
 <body>
     <header>
@@ -17,15 +16,19 @@
             <h2 class="titulo">Gerenciamento de Vendas</h2>
         </nav>
     </header>
+
     <section class="menu">
         <details>
-            <summary><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
-  <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
-</svg></summary>
+            <summary>
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
+                </svg>
+            </summary>
             <ul>
                 <li><a href="index.html">Painel de Gestão</a></li>
                 <li><a href="cadastro.html">Cadastro de Moita</a></li>
                 <li><a href="despesas.html">Gerenciamento de Despesas</a></li>
+                <li><a href="companheiros.html">Gerenciamento de Companheiros</a></li>
                 <li><a href="colheita.html">Gerenciamento de colheita</a></li>
             </ul>
         </details>
@@ -34,6 +37,10 @@
     <section>
         <h3>Gerenciamento de Vendas</h3>
         <form id="gerenciamento-vendas-form">
+            <label for="moita-vendas">Moita:</label>
+            <select id="moita-vendas" name="moita-vendas" >
+                <option value="">Selecione uma moita</option>
+            </select><br><br>
      
             <label for="data-venda">Data da Venda:</label>
             <input type="date" id="data-venda" name="data-venda" required><br><br>
@@ -46,6 +53,6 @@
 
             <button type="submit">Registrar Venda</button>
         </form>
-    
+    </section>
 </body>
 </html>

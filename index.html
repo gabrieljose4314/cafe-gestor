@@ -1,62 +1,88 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Gestão de cafe</title>
+    <title>Painel de Gestão de Café</title>
 
     <link rel="stylesheet" href="style.css">
-    <script type="module" src="firebase.js" defer></script>
     <script type="module" src="script.js" defer></script>
-
 </head>
 
 <body>
     <header>
         <nav>
-            <h1>Painel de Gestão de cafe</h1>
+            <h1>Painel de Gestão de Café</h1>
             <hr>
             <h2 class="titulo">Painel Geral</h2>
         </nav>
     </header>
+
     <section class="menu">
         <div class="usuario">
             <h2 id="nomeUsuario"></h2>
             <button id="logout">Sair</button>
         </div>
+
         <details>
-            <summary><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
-  <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
-</svg></summary>
+            <summary>
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
+                </svg>
+            </summary>
             <ul>
                 <li><a href="cadastro.html">Cadastro de Moita</a></li>
                 <li><a href="despesas.html">Gerenciamento de Despesas</a></li>
-                <li><a href="colheita.html">Gerenciamento de colheita</a></li>
+                <li><a href="companheiros.html">Gerenciamento de Companheiros</a></li>
+                <li><a href="colheita.html">Gerenciamento de Colheita</a></li>
                 <li><a href="vendas.html">Gerenciamento de Vendas</a></li>
             </ul>
         </details>
-        
     </section>
 
-<section class="display-painel">
+    <main>
+        <section class="display-painel">
+            <div class="painel-card painel-ganho-bruto">
+                <h3>Ganho Bruto</h3>
+                <p id="ganho-bruto">R$ 0,00</p>
+            </div>
 
-    <div class="painel-ganho-bruto">
-        <h3>Ganho Bruto</h3>
-        <p id="ganho-bruto">R$ 0</p>
-    </div>
+            <div class="painel-card painel-gasto-bruto">
+                <h3>Gasto Bruto</h3>
+                <p id="gasto-bruto">R$ 0,00</p>
+                <button id="toggle-detalhes-despesas" class="btn-detalhes">Detalhes</button>
 
-    <div class="painel-gasto-bruto">
-        <h3>Gasto Bruto</h3>
-        <p id="gasto-bruto">R$ 0</p>
-    </div>
+                <div id="detalhes-despesas" class="detalhes-despesas oculto">
+                    <p><strong>Fertilizante:</strong> <span id="gasto-fertilizante">R$ 0,00</span></p>
+                    <p><strong>Defensivo:</strong> <span id="gasto-defensivo">R$ 0,00</span></p>
+                    <p><strong>Herbicidas:</strong> <span id="gasto-herbicidas">R$ 0,00</span></p>
+                    <p><strong>Mão de Obra:</strong> <span id="gasto-mao-de-obra">R$ 0,00</span></p>
+                    <p><strong>Outros:</strong> <span id="gasto-outros">R$ 0,00</span></p>
+                </div>
+            </div>
 
-    <div class="painel-lucro">
-        <h3>Lucro</h3>
-        <p id="lucro-total">R$ 0</p>
-    </div>
+            <div class="painel-card painel-lucro">
+                <h3>Lucro</h3>
+                <p id="lucro-total">R$ 0,00</p>
+            </div>
 
-</section>
+            <div class="painel-card painel-colheita">
+                <h3>Total de Colheita</h3>
+                <p id="total-colheita">0 kg</p>
+            </div>
+
+            <div class="painel-card painel-pendente-companheiros">
+                <h3>Pendente de Companheiros</h3>
+                <p id="pendente-companheiros">R$ 0,00</p>
+            </div>
+
+            <div class="painel-card painel-moitas">
+                <h3>Moitas Cadastradas</h3>
+                <p id="total-moitas">0</p>
+            </div>
+        </section>
+    </main>
 </body>
 
 </html>

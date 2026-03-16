@@ -2,57 +2,91 @@ import { auth, db } from "./firebase.js";
 
 import {
   collection,
-  addDoc
+  addDoc,
+  getDocs
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
 import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
 
-
 const formVenda = document.getElementById("gerenciamento-vendas-form");
+const selectMoita = document.getElementById("moita-vendas");
 
-onAuthStateChanged(auth, (user) => {
+let usuarioAtual = null;
 
+async function carregarMoitas(user) {
+  try {
+    selectMoita.innerHTML = '<option value="">Sem moita específica</option>';
+
+    const snapshot = await getDocs(
+      collection(db, "usuarios", user.uid, "moitas")
+    );
+
+    snapshot.forEach((doc) => {
+      const moita = doc.data();
+
+      const option = document.createElement("option");
+      option.value = doc.id;
+      option.textContent = moita.nome;
+
+      selectMoita.appendChild(option);
+    });
+
+  } catch (erro) {
+    console.error("Erro ao carregar moitas:", erro);
+    alert("Erro ao carregar moitas");
+  }
+}
+
+onAuthStateChanged(auth, async (user) => {
   if (!user) {
     window.location.href = "login.html";
     return;
   }
 
-  formVenda.addEventListener("submit", async (e) => {
+  usuarioAtual = user;
+  await carregarMoitas(user);
+});
 
-    e.preventDefault();
+formVenda.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    const data = document.getElementById("data-venda").value;
-    const quantidade = document.getElementById("quantidade-vendida").value;
-    const preco = document.getElementById("preco-unitario").value;
+  if (!usuarioAtual) {
+    alert("Usuário não autenticado");
+    return;
+  }
 
-    const valorTotal = quantidade * preco;
+  const moitaId = selectMoita.value;
+  const moitaNome = moitaId
+    ? selectMoita.options[selectMoita.selectedIndex].text
+    : null;
 
-    try {
+  const data = document.getElementById("data-venda").value;
+  const quantidade = document.getElementById("quantidade-vendida").value;
+  const preco = document.getElementById("preco-unitario").value;
 
-      await addDoc(
-        collection(db, "usuarios", user.uid, "vendas"),
-        {
-          data: data,
-          quantidade: Number(quantidade),
-          precoUnitario: Number(preco),
-          valorTotal: Number(valorTotal),
-          criadoEm: new Date()
-        }
-      );
+  const valorTotal = Number(quantidade) * Number(preco);
 
-      alert("Venda registrada com sucesso!");
+  try {
+    await addDoc(
+      collection(db, "usuarios", usuarioAtual.uid, "vendas"),
+      {
+        moitaId: moitaId || null,
+        moitaNome: moitaNome || null,
+        data: data,
+        quantidade: Number(quantidade),
+        precoUnitario: Number(preco),
+        valorTotal: valorTotal,
+        criadoEm: new Date()
+      }
+    );
 
-      formVenda.reset();
+    alert("Venda registrada com sucesso!");
+    formVenda.reset();
 
-    } catch (erro) {
-
-      console.error("Erro ao registrar venda:", erro);
-      alert("Erro ao registrar venda");
-
-    }
-
-  });
-
+  } catch (erro) {
+    console.error("Erro ao registrar venda:", erro);
+    alert("Erro ao registrar venda");
+  }
 });

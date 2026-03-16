@@ -9,48 +9,49 @@ import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
 
-
 const form = document.getElementById("cadastro-moita-form");
 
-onAuthStateChanged(auth, (user) => {
+let usuarioAtual = null;
 
+onAuthStateChanged(auth, (user) => {
   if (!user) {
     window.location.href = "login.html";
     return;
   }
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+  usuarioAtual = user;
+});
 
-    const nome = document.getElementById("nome-moita").value;
-    const area = document.getElementById("area-moita").value;
-    const pes = document.getElementById("quantidade-de-pes").value;
-    const tipo = document.getElementById("tipo-de-cafe").value;
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    try {
+  if (!usuarioAtual) {
+    alert("Usuário não autenticado");
+    return;
+  }
 
-      await addDoc(
-        collection(db, "usuarios", user.uid, "moitas"),
-        {
-          nome: nome,
-          area: Number(area),
-          pes: Number(pes),
-          tipo: tipo,
-          dataCriacao: new Date()
-        }
-      );
+  const nome = document.getElementById("nome-moita").value;
+  const area = document.getElementById("area-moita").value;
+  const pes = document.getElementById("quantidade-de-pes").value;
+  const tipo = document.getElementById("tipo-de-cafe").value;
 
-      alert("Moita cadastrada com sucesso!");
+  try {
+    await addDoc(
+      collection(db, "usuarios", usuarioAtual.uid, "moitas"),
+      {
+        nome: nome,
+        area: Number(area),
+        pes: Number(pes),
+        tipo: tipo,
+        dataCriacao: new Date()
+      }
+    );
 
-      form.reset();
+    alert("Moita cadastrada com sucesso!");
+    form.reset();
 
-    } catch (erro) {
-
-      console.error("Erro ao cadastrar:", erro);
-      alert("Erro ao cadastrar moita");
-
-    }
-
-  });
-
+  } catch (erro) {
+    console.error("Erro ao cadastrar:", erro);
+    alert("Erro ao cadastrar moita");
+  }
 });

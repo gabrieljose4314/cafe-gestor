@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Companheiros</title>
+
+  <link rel="stylesheet" href="style.css" />
+  <script type="module" src="companheiros.js"></script>
+</head>
+<body>
+  <header>
+    <nav>
+      <h1>Painel de Gestão de Café</h1>
+      <hr />
+      <h2 class="titulo">Companheiros</h2>
+    </nav>
+  </header>
+
+  <section class="menu">
+    <details>
+      <summary>
+        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+          <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
+        </svg>
+      </summary>
+      <ul>
+        <li><a href="index.html">Painel de Gestão</a></li>
+        <li><a href="cadastro.html">Cadastro de Moita</a></li>
+        <li><a href="despesas.html">Gerenciamento de Despesas</a></li>
+        <li><a href="colheita.html">Gerenciamento de Colheita</a></li>
+        <li><a href="vendas.html">Gerenciamento de Vendas</a></li>
+      </ul>
+    </details>
+  </section>
+
+  <main>
+    <section>
+      <h3>Cadastro de Companheiro</h3>
+      <form id="cadastro-companheiro-form">
+        <label for="nome-companheiro">Nome:</label>
+        <input type="text" id="nome-companheiro" required />
+        <br><br>
+
+        <label for="telefone-companheiro">Celular:</label>
+        <input type="tel" id="telefone-companheiro" placeholder="(00) 00000-0000" />
+        <br><br>
+
+        <label for="observacao-companheiro">Observação:</label><br>
+        <input type="text" id="observacao-companheiro" />
+        <br><br>
+
+        <button type="submit">Cadastrar Companheiro</button>
+      </form>
+    </section>
+
+    <section>
+      <h3>Companheiros Cadastrados</h3>
+      <div id="lista-companheiros"></div>
+    </section>
+
+    <section>
+      <h3>Registrar Trabalho</h3>
+      <form id="registro-trabalho-form">
+        <label for="companheiro-trabalho">Companheiro:</label>
+        <select id="companheiro-trabalho" required>
+          <option value="">Selecione um companheiro</option>
+        </select>
+        <br><br>
+
+        <label for="moita-trabalho">Moita:</label>
+        <select id="moita-trabalho">
+          <option value="">Sem moita específica</option>
+        </select>
+        <br><br>
+
+        <label for="data-trabalho">Data:</label>
+        <input type="date" id="data-trabalho" required />
+        <br><br>
+
+        <label for="servico-trabalho">Serviço realizado:</label>
+        <input type="text" id="servico-trabalho" placeholder="Ex: colheita, capina, adubação" required />
+        <br><br>
+
+        <label for="valor-trabalho">Valor a pagar (R$):</label>
+        <input type="number" id="valor-trabalho" step="0.01" required />
+        <br><br>
+
+        <label for="status-pagamento">Status do pagamento:</label>
+        <select id="status-pagamento" required>
+          <option value="pendente">Pendente</option>
+          <option value="pago">Pago</option>
+        </select>
+        <br><br>
+
+        <label for="observacao-trabalho">Observação:</label><br>
+        <input type="text" id="observacao-trabalho" />
+        <br><br>
+
+        <button type="submit">Registrar Trabalho</button>
+      </form>
+    </section>
+
+    <section>
+      <h3>Monitoramento de Pagamentos</h3>
+
+      <label for="pesquisa-companheiro">Pesquisar por nome:</label>
+      <input type="text" id="pesquisa-companheiro" placeholder="Digite o nome do companheiro" />
+      <br><br>
+
+      <div id="resumo-pagamentos">
+        <p><strong>Total pendente:</strong> <span id="total-pendente">R$ 0,00</span></p>
+        <p><strong>Total pago:</strong> <span id="total-pago">R$ 0,00</span></p>
+      </div>
+
+      <h4>Pendentes de Pagamento</h4>
+      <div id="lista-pendentes"></div>
+
+      <h4>Pagamentos Realizados</h4>
+      <div id="lista-pagos"></div>
+    </section>
+  </main>
+</body>
+</html>
