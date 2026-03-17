@@ -56,16 +56,28 @@ function formatarDataBR(data) {
   return `${partes[2]}/${partes[1]}/${partes[0]}`;
 }
 
+async function lancarDespesaDePagamento(trabalho, dataPagamento) {
+  const despesaRef = await addDoc(
+    collection(db, "usuarios", usuarioAtual.uid, "despesas"),
+    {
+      categoria: "Mão de Obra",
+      descricao: `Pagamento para ${trabalho.companheiroNome} - ${trabalho.servico}`,
+      valor: Number(trabalho.valor) || 0,
+      data: dataPagamento,
+      moitaId: trabalho.moitaId || null,
+      moitaNome: trabalho.moitaNome || null,
+      criadoEm: new Date()
+    }
+  );
+
+  return despesaRef.id;
+}
+
 function criarCardTrabalho(trabalho, trabalhoId) {
   const valor = Number(trabalho.valor) || 0;
   const estaPago = trabalho.statusPagamento === "pago";
 
   const div = document.createElement("div");
-  div.style.border = "1px solid #ccc";
-  div.style.padding = "10px";
-  div.style.marginBottom = "10px";
-  div.style.borderRadius = "8px";
-
   div.innerHTML = `
     <p><strong>Companheiro:</strong> ${trabalho.companheiroNome}</p>
     <p><strong>Telefone:</strong> ${trabalho.companheiroTelefone || "-"}</p>
@@ -97,11 +109,6 @@ function renderizarListaCompanheiros() {
 
   todosOsCompanheiros.forEach((companheiro) => {
     const div = document.createElement("div");
-    div.style.border = "1px solid #ccc";
-    div.style.padding = "10px";
-    div.style.marginBottom = "10px";
-    div.style.borderRadius = "8px";
-
     div.innerHTML = `
       <p><strong>Nome:</strong> ${companheiro.nome}</p>
       <p><strong>Telefone:</strong> ${companheiro.telefone || "-"}</p>
@@ -140,7 +147,6 @@ async function carregarCompanheiros(user) {
     });
 
     renderizarListaCompanheiros();
-
   } catch (erro) {
     console.error("Erro ao carregar companheiros:", erro);
   }
@@ -263,14 +269,31 @@ function adicionarEventosBotoesPagamento() {
       const trabalhoId = botao.getAttribute("data-id");
 
       try {
+        const trabalho = todosOsTrabalhos.find((item) => item.id === trabalhoId);
+
+        if (!trabalho) {
+          alert("Trabalho não encontrado.");
+          return;
+        }
+
+        if (trabalho.lancadoComoDespesa || trabalho.despesaId) {
+          alert("Este pagamento já foi lançado nas despesas.");
+          return;
+        }
+
+        const dataPagamento = obterDataHoje();
+        const despesaId = await lancarDespesaDePagamento(trabalho, dataPagamento);
+
         const ref = doc(db, "usuarios", usuarioAtual.uid, "trabalhosCompanheiros", trabalhoId);
 
         await updateDoc(ref, {
           statusPagamento: "pago",
-          dataPagamento: obterDataHoje()
+          dataPagamento: dataPagamento,
+          lancadoComoDespesa: true,
+          despesaId: despesaId
         });
 
-        alert("Pagamento marcado como pago com sucesso!");
+        alert("Pagamento marcado como pago e lançado nas despesas!");
         await buscarTrabalhos(usuarioAtual);
 
       } catch (erro) {
@@ -292,11 +315,25 @@ function adicionarEventosBotoesVoltarPendente() {
       if (!confirmar) return;
 
       try {
+        const trabalho = todosOsTrabalhos.find((item) => item.id === trabalhoId);
+
+        if (!trabalho) {
+          alert("Trabalho não encontrado.");
+          return;
+        }
+
+        if (trabalho.despesaId) {
+          const despesaRef = doc(db, "usuarios", usuarioAtual.uid, "despesas", trabalho.despesaId);
+          await deleteDoc(despesaRef);
+        }
+
         const ref = doc(db, "usuarios", usuarioAtual.uid, "trabalhosCompanheiros", trabalhoId);
 
         await updateDoc(ref, {
           statusPagamento: "pendente",
-          dataPagamento: null
+          dataPagamento: null,
+          lancadoComoDespesa: false,
+          despesaId: null
         });
 
         alert("Pagamento voltou para pendente com sucesso!");
@@ -321,8 +358,14 @@ function adicionarEventosBotoesExcluirTrabalho() {
       if (!confirmar) return;
 
       try {
-        const ref = doc(db, "usuarios", usuarioAtual.uid, "trabalhosCompanheiros", trabalhoId);
+        const trabalho = todosOsTrabalhos.find((item) => item.id === trabalhoId);
 
+        if (trabalho?.despesaId) {
+          const despesaRef = doc(db, "usuarios", usuarioAtual.uid, "despesas", trabalho.despesaId);
+          await deleteDoc(despesaRef);
+        }
+
+        const ref = doc(db, "usuarios", usuarioAtual.uid, "trabalhosCompanheiros", trabalhoId);
         await deleteDoc(ref);
 
         alert("Registro excluído com sucesso!");
@@ -445,23 +488,40 @@ formTrabalho.addEventListener("submit", async (e) => {
   }
 
   try {
-    await addDoc(
+    const dataPagamento = statusPagamento === "pago" ? obterDataHoje() : null;
+
+    const trabalhoBase = {
+      companheiroId: companheiroId,
+      companheiroNome: companheiroNome,
+      companheiroTelefone: companheiroTelefone,
+      moitaId: moitaId || null,
+      moitaNome: moitaNome || null,
+      data: data,
+      servico: servico,
+      valor: Number(valor),
+      statusPagamento: statusPagamento,
+      dataPagamento: dataPagamento,
+      lancadoComoDespesa: false,
+      despesaId: null,
+      observacao: observacao || null,
+      criadoEm: new Date()
+    };
+
+    const trabalhoRef = await addDoc(
       collection(db, "usuarios", usuarioAtual.uid, "trabalhosCompanheiros"),
-      {
-        companheiroId: companheiroId,
-        companheiroNome: companheiroNome,
-        companheiroTelefone: companheiroTelefone,
-        moitaId: moitaId || null,
-        moitaNome: moitaNome || null,
-        data: data,
-        servico: servico,
-        valor: Number(valor),
-        statusPagamento: statusPagamento,
-        dataPagamento: statusPagamento === "pago" ? obterDataHoje() : null,
-        observacao: observacao || null,
-        criadoEm: new Date()
-      }
+      trabalhoBase
     );
+
+    if (statusPagamento === "pago") {
+      const despesaId = await lancarDespesaDePagamento(trabalhoBase, dataPagamento);
+
+      const ref = doc(db, "usuarios", usuarioAtual.uid, "trabalhosCompanheiros", trabalhoRef.id);
+
+      await updateDoc(ref, {
+        lancadoComoDespesa: true,
+        despesaId: despesaId
+      });
+    }
 
     alert("Trabalho registrado com sucesso!");
     formTrabalho.reset();
