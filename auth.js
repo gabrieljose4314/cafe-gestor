@@ -36,13 +36,28 @@ async function criarUsuarioSeNaoExistir(user) {
         email: user.email,
         foto: user.photoURL,
         criado_em: new Date()
+      },
+      acesso: {
+        aprovado: false,
+        admin: false,
+        bloqueado: false
       }
     });
 
-    console.log("Usuário criado no Firestore");
-  } else {
-    console.log("Usuário já existe");
+    return {
+      aprovado: false,
+      admin: false,
+      bloqueado: false
+    };
   }
+
+  const dadosUsuario = userSnap.data();
+
+  return dadosUsuario.acesso || {
+    aprovado: false,
+    admin: false,
+    bloqueado: false
+  };
 }
 
 if (btnLogin) {
@@ -53,10 +68,31 @@ onAuthStateChanged(auth, async (user) => {
   if (!user) return;
 
   try {
-    await criarUsuarioSeNaoExistir(user);
-    window.location.href = "index.html";
+    const acesso = await criarUsuarioSeNaoExistir(user);
+
+    // 1. bloqueado sempre perde prioridade
+    if (acesso.bloqueado) {
+      window.location.href = "bloqueado.html";
+      return;
+    }
+
+    // 2. admin sempre entra no admin, mesmo se aprovado estiver false
+    if (acesso.admin === true) {
+      window.location.href = "admin.html";
+      return;
+    }
+
+    // 3. usuário comum aprovado entra no painel
+    if (acesso.aprovado === true) {
+      window.location.href = "index.html";
+      return;
+    }
+
+    // 4. se não for admin e não estiver aprovado
+    window.location.href = "aguardando.html";
+
   } catch (error) {
-    console.error("Erro ao verificar/criar usuário:", error);
+    console.error("Erro ao verificar acesso:", error);
     alert("Erro ao acessar sua conta.");
   }
 });

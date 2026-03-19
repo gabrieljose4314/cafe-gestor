@@ -1,4 +1,5 @@
-import { auth, db } from "./firebase.js";
+import { db } from "./firebase.js";
+import { exigirUsuarioAprovado } from "./acesso.js";
 
 import {
   collection,
@@ -8,10 +9,6 @@ import {
   updateDoc,
   deleteDoc
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
-
-import {
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
 
 const formCompanheiro = document.getElementById("cadastro-companheiro-form");
 const formTrabalho = document.getElementById("registro-trabalho-form");
@@ -33,7 +30,7 @@ let todosOsTrabalhos = [];
 let todosOsCompanheiros = [];
 
 function formatarMoeda(valor) {
-  return valor.toLocaleString("pt-BR", {
+  return Number(valor || 0).toLocaleString("pt-BR", {
     style: "currency",
     currency: "BRL"
   });
@@ -414,18 +411,16 @@ function adicionarEventosBotoesExcluirCompanheiro() {
   });
 }
 
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    window.location.href = "login.html";
-    return;
-  }
+(async function iniciarCompanheiros() {
+  const resultado = await exigirUsuarioAprovado();
+  if (!resultado) return;
 
-  usuarioAtual = user;
+  usuarioAtual = resultado.user;
 
-  await carregarCompanheiros(user);
-  await carregarMoitas(user);
-  await buscarTrabalhos(user);
-});
+  await carregarCompanheiros(usuarioAtual);
+  await carregarMoitas(usuarioAtual);
+  await buscarTrabalhos(usuarioAtual);
+})();
 
 formCompanheiro.addEventListener("submit", async (e) => {
   e.preventDefault();

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Histórico de Movimentações</title>
+
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="historico.js"></script>
+</head>
+<body>
+  <header>
+    <nav>
+      <h1>Painel de Gestão de Café</h1>
+      <hr>
+      <h2 class="titulo">Histórico de Movimentações</h2>
+    </nav>
+  </header>
+
+  <section class="menu">
+    <details>
+      <summary>☰ Menu</summary>
+      <ul>
+        <li><a href="index.html">Painel de Gestão</a></li>
+        <li><a href="producao.html">Produção por Moita</a></li>
+        <li><a href="cadastro.html">Cadastro de Moita</a></li>
+        <li><a href="despesas.html">Gerenciamento de Despesas</a></li>
+        <li><a href="companheiros.html">Gerenciamento de Companheiros</a></li>
+        <li><a href="colheita.html">Gerenciamento de Colheita</a></li>
+        <li><a href="vendas.html">Gerenciamento de Vendas</a></li>
+      </ul>
+    </details>
+  </section>
+
+  <main>
+    <section>
+      <h3>Filtros</h3>
+
+      <label for="pesquisa-historico">Pesquisar:</label>
+      <input type="text" id="pesquisa-historico" placeholder="Pesquisar por descrição, moita, categoria, companheiro...">
+      <br><br>
+
+      <label for="filtro-ano">Ano:</label>
+      <select id="filtro-ano">
+        <option value="">Todos</option>
+      </select>
+      <br><br>
+
+      <label for="filtro-mes">Mês:</label>
+      <select id="filtro-mes">
+        <option value="">Todos</option>
+        <option value="01">Janeiro</option>
+        <option value="02">Fevereiro</option>
+        <option value="03">Março</option>
+        <option value="04">Abril</option>
+        <option value="05">Maio</option>
+        <option value="06">Junho</option>
+        <option value="07">Julho</option>
+        <option value="08">Agosto</option>
+        <option value="09">Setembro</option>
+        <option value="10">Outubro</option>
+        <option value="11">Novembro</option>
+        <option value="12">Dezembro</option>
+      </select>
+    </section>
+
+    <section>
+      <h3>Histórico</h3>
+      <div id="lista-historico"></div>
+    </section>
+  </main>
+</body>
+</html>

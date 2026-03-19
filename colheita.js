@@ -1,14 +1,11 @@
-import { auth, db } from "./firebase.js";
+import { db } from "./firebase.js";
+import { exigirUsuarioAprovado } from "./acesso.js";
 
 import {
   collection,
   addDoc,
   getDocs
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
-
-import {
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
 
 const formColheita = document.getElementById("gerenciamento-colheita-form");
 const selectMoita = document.getElementById("moita-colheita");
@@ -17,20 +14,11 @@ let usuarioAtual = null;
 
 async function carregarMoitas(user) {
   try {
-    selectMoita.innerHTML = '<option value="">Selecione uma moita</option>';
+    selectMoita.innerHTML = '<option value="">Sem moita específica</option>';
 
     const snapshot = await getDocs(
       collection(db, "usuarios", user.uid, "moitas")
     );
-
-    if (snapshot.empty) {
-      const option = document.createElement("option");
-      option.value = "";
-      option.textContent = "Nenhuma moita cadastrada";
-      option.disabled = true;
-      selectMoita.appendChild(option);
-      return;
-    }
 
     snapshot.forEach((doc) => {
       const moita = doc.data();
@@ -48,15 +36,13 @@ async function carregarMoitas(user) {
   }
 }
 
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    window.location.href = "login.html";
-    return;
-  }
+(async function iniciarColheita() {
+  const resultado = await exigirUsuarioAprovado();
+  if (!resultado) return;
 
-  usuarioAtual = user;
-  await carregarMoitas(user);
-});
+  usuarioAtual = resultado.user;
+  await carregarMoitas(usuarioAtual);
+})();
 
 formColheita.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -67,21 +53,19 @@ formColheita.addEventListener("submit", async (e) => {
   }
 
   const moitaId = selectMoita.value;
-  const moitaNome = selectMoita.options[selectMoita.selectedIndex].text;
+  const moitaNome = moitaId
+    ? selectMoita.options[selectMoita.selectedIndex].text
+    : null;
+
   const data = document.getElementById("data-colheita").value;
   const quantidade = document.getElementById("quantidade-colhida").value;
-
-  if (!moitaId) {
-    alert("Selecione uma moita");
-    return;
-  }
 
   try {
     await addDoc(
       collection(db, "usuarios", usuarioAtual.uid, "colheitas"),
       {
-        moitaId: moitaId,
-        moitaNome: moitaNome,
+        moitaId: moitaId || null,
+        moitaNome: moitaNome || null,
         data: data,
         quantidade: Number(quantidade),
         criadoEm: new Date()

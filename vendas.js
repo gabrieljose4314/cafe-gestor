@@ -1,14 +1,11 @@
-import { auth, db } from "./firebase.js";
+import { db } from "./firebase.js";
+import { exigirUsuarioAprovado } from "./acesso.js";
 
 import {
   collection,
   addDoc,
   getDocs
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
-
-import {
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
 
 const formVenda = document.getElementById("gerenciamento-vendas-form");
 const selectMoita = document.getElementById("moita-vendas");
@@ -39,15 +36,13 @@ async function carregarMoitas(user) {
   }
 }
 
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    window.location.href = "login.html";
-    return;
-  }
+(async function iniciarVendas() {
+  const resultado = await exigirUsuarioAprovado();
+  if (!resultado) return;
 
-  usuarioAtual = user;
-  await carregarMoitas(user);
-});
+  usuarioAtual = resultado.user;
+  await carregarMoitas(usuarioAtual);
+})();
 
 formVenda.addEventListener("submit", async (e) => {
   e.preventDefault();

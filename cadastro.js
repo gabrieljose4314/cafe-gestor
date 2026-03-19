@@ -1,26 +1,21 @@
-import { auth, db } from "./firebase.js";
+import { db } from "./firebase.js";
+import { exigirUsuarioAprovado } from "./acesso.js";
 
 import {
   collection,
   addDoc
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
-import {
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
-
 const form = document.getElementById("cadastro-moita-form");
 
 let usuarioAtual = null;
 
-onAuthStateChanged(auth, (user) => {
-  if (!user) {
-    window.location.href = "login.html";
-    return;
-  }
+(async function iniciarCadastro() {
+  const resultado = await exigirUsuarioAprovado();
+  if (!resultado) return;
 
-  usuarioAtual = user;
-});
+  usuarioAtual = resultado.user;
+})();
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();

@@ -429,7 +429,10 @@ button:hover {
 #lista-companheiros div,
 #lista-pendentes div,
 #lista-pagos div,
-#lista-trabalhos div {
+#lista-trabalhos div,
+#lista-historico div,
+#lista-producao div,
+#lista-usuarios div {
     background-color: #fcfaf7;
     border: 1px solid #e0d3c0;
     padding: 1rem;
@@ -441,15 +444,34 @@ button:hover {
 #lista-companheiros div:hover,
 #lista-pendentes div:hover,
 #lista-pagos div:hover,
-#lista-trabalhos div:hover {
-    box-shadow: 0 3px 10px rgba(80, 60, 30, 0.10);
+#lista-trabalhos div:hover,
+#lista-historico div:hover,
+#lista-producao div:hover,
+#lista-usuarios div:hover {
+    box-shadow: 0 3px 10px rgba(11, 11, 11, 0.1);
 }
 
 #lista-companheiros p,
 #lista-pendentes p,
 #lista-pagos p,
-#lista-trabalhos p {
+#lista-trabalhos p,
+#lista-historico p,
+#lista-producao p,
+#lista-usuarios p {
     margin-bottom: 0.4rem;
+}
+#logout-admin {
+    background-color: #a61d1d;
+    color: #fff;
+    padding: 0.6rem 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+#logout-admin:hover {
+    background-color: #7d1515;
 }
 
 /* =========================

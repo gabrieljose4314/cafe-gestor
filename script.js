@@ -1,13 +1,11 @@
 import { auth, db } from "./firebase.js";
+import { exigirUsuarioAprovado } from "./acesso.js";
 
 import {
-  onAuthStateChanged,
   signOut
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
 
 import {
-  doc,
-  getDoc,
   collection,
   getDocs
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
@@ -27,16 +25,9 @@ function formatarKg(valor) {
   return `${valor.toLocaleString("pt-BR")} kg`;
 }
 
-async function carregarDadosUsuario(user) {
-  const userRef = doc(db, "usuarios", user.uid);
-  const snap = await getDoc(userRef);
-
-  if (snap.exists()) {
-    const dados = snap.data().dados;
-
-    document.getElementById("nomeUsuario").textContent =
-      "Bem-vindo, " + dados.nome;
-  }
+async function carregarDadosUsuario(dados) {
+  document.getElementById("nomeUsuario").textContent =
+    "Bem-vindo, " + dados.dados.nome;
 }
 
 async function carregarResumoFinanceiro(user) {
@@ -52,23 +43,21 @@ async function carregarResumoFinanceiro(user) {
   let gastoMaoDeObra = 0;
   let gastoOutros = 0;
 
-  // VENDAS
   const vendasSnapshot = await getDocs(
     collection(db, "usuarios", user.uid, "vendas")
   );
 
-  vendasSnapshot.forEach((doc) => {
-    const venda = doc.data();
+  vendasSnapshot.forEach((docItem) => {
+    const venda = docItem.data();
     ganhoBruto += Number(venda.valorTotal) || 0;
   });
 
-  // DESPESAS
   const despesasSnapshot = await getDocs(
     collection(db, "usuarios", user.uid, "despesas")
   );
 
-  despesasSnapshot.forEach((doc) => {
-    const despesa = doc.data();
+  despesasSnapshot.forEach((docItem) => {
+    const despesa = docItem.data();
     const valor = Number(despesa.valor) || 0;
     const categoria = despesa.categoria || "";
 
@@ -87,30 +76,27 @@ async function carregarResumoFinanceiro(user) {
     }
   });
 
-  // COLHEITAS
   const colheitasSnapshot = await getDocs(
     collection(db, "usuarios", user.uid, "colheitas")
   );
 
-  colheitasSnapshot.forEach((doc) => {
-    const colheita = doc.data();
+  colheitasSnapshot.forEach((docItem) => {
+    const colheita = docItem.data();
     totalColheita += Number(colheita.quantidade) || 0;
   });
 
-  // COMPANHEIROS PENDENTES
   const trabalhosSnapshot = await getDocs(
     collection(db, "usuarios", user.uid, "trabalhosCompanheiros")
   );
 
-  trabalhosSnapshot.forEach((doc) => {
-    const trabalho = doc.data();
+  trabalhosSnapshot.forEach((docItem) => {
+    const trabalho = docItem.data();
 
     if (trabalho.statusPagamento === "pendente") {
       pendenteCompanheiros += Number(trabalho.valor) || 0;
     }
   });
 
-  // MOITAS
   const moitasSnapshot = await getDocs(
     collection(db, "usuarios", user.uid, "moitas")
   );
@@ -126,38 +112,46 @@ async function carregarResumoFinanceiro(user) {
   document.getElementById("pendente-companheiros").textContent = formatarMoeda(pendenteCompanheiros);
   document.getElementById("total-moitas").textContent = totalMoitas;
 
-  document.getElementById("gasto-fertilizante").textContent = formatarMoeda(gastoFertilizante);
-  document.getElementById("gasto-defensivo").textContent = formatarMoeda(gastoDefensivo);
-  document.getElementById("gasto-herbicidas").textContent = formatarMoeda(gastoHerbicidas);
-  document.getElementById("gasto-mao-de-obra").textContent = formatarMoeda(gastoMaoDeObra);
-  document.getElementById("gasto-outros").textContent = formatarMoeda(gastoOutros);
+  const elFertilizante = document.getElementById("gasto-fertilizante");
+  const elDefensivo = document.getElementById("gasto-defensivo");
+  const elHerbicidas = document.getElementById("gasto-herbicidas");
+  const elMaoDeObra = document.getElementById("gasto-mao-de-obra");
+  const elOutros = document.getElementById("gasto-outros");
+
+  if (elFertilizante) elFertilizante.textContent = formatarMoeda(gastoFertilizante);
+  if (elDefensivo) elDefensivo.textContent = formatarMoeda(gastoDefensivo);
+  if (elHerbicidas) elHerbicidas.textContent = formatarMoeda(gastoHerbicidas);
+  if (elMaoDeObra) elMaoDeObra.textContent = formatarMoeda(gastoMaoDeObra);
+  if (elOutros) elOutros.textContent = formatarMoeda(gastoOutros);
 }
 
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    window.location.href = "login.html";
-    return;
-  }
-
+(async function iniciarPainel() {
   try {
-    await carregarDadosUsuario(user);
-    await carregarResumoFinanceiro(user);
+    const resultado = await exigirUsuarioAprovado();
+    if (!resultado) return;
+
+    await carregarDadosUsuario(resultado.dados);
+    await carregarResumoFinanceiro(resultado.user);
   } catch (erro) {
     console.error("Erro ao carregar painel:", erro);
   }
-});
+})();
 
-botaoLogout.addEventListener("click", async () => {
-  await signOut(auth);
-  window.location.href = "login.html";
-});
+if (botaoLogout) {
+  botaoLogout.addEventListener("click", async () => {
+    await signOut(auth);
+    window.location.href = "login.html";
+  });
+}
 
-botaoDetalhes.addEventListener("click", () => {
-  detalhesDespesas.classList.toggle("oculto");
+if (botaoDetalhes && detalhesDespesas) {
+  botaoDetalhes.addEventListener("click", () => {
+    detalhesDespesas.classList.toggle("oculto");
 
-  if (detalhesDespesas.classList.contains("oculto")) {
-    botaoDetalhes.textContent = "Detalhes";
-  } else {
-    botaoDetalhes.textContent = "Ocultar";
-  }
-});
+    if (detalhesDespesas.classList.contains("oculto")) {
+      botaoDetalhes.textContent = "Detalhes";
+    } else {
+      botaoDetalhes.textContent = "Ocultar";
+    }
+  });
+}
