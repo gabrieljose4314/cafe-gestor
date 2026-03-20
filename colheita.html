@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +8,6 @@
     <link rel="stylesheet" href="style.css">
     <script type="module" src="colheita.js"></script>
 </head>
-
 <body>
     <header>
         <nav>
@@ -21,15 +19,10 @@
 
     <section class="menu">
         <details>
-            <summary>
-                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor"
-                    class="bi bi-list" viewBox="0 0 16 16">
-                    <path fill-rule="evenodd"
-                        d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5" />
-                </svg>
-            </summary>
+            <summary>☰ Menu</summary>
             <ul>
                 <li><a href="index.html">Painel de Gestão</a></li>
+                <li><a href="producao.html">Produção por Moita</a></li>
                 <li><a href="cadastro.html">Cadastro de Moita</a></li>
                 <li><a href="despesas.html">Gerenciamento de Despesas</a></li>
                 <li><a href="companheiros.html">Gerenciamento de Companheiros</a></li>
@@ -43,8 +36,8 @@
         <h3>Gerenciamento de Colheita</h3>
         <form id="gerenciamento-colheita-form">
             <label for="moita-colheita">Moita:</label>
-            <select id="moita-colheita" name="moita-colheita" required>
-                <option value="">Selecione uma moita</option>
+            <select id="moita-colheita" name="moita-colheita">
+                <option value="">Sem moita específica</option>
             </select><br><br>
 
             <label for="data-colheita">Data da Colheita:</label>
@@ -56,6 +49,10 @@
             <button type="submit">Registrar Colheita</button>
         </form>
     </section>
-</body>
 
+    <section>
+        <h3>Colheitas Registradas</h3>
+        <div id="lista-colheitas"></div>
+    </section>
+</body>
 </html>

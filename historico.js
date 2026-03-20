@@ -10,6 +10,7 @@ const listaHistorico = document.getElementById("lista-historico");
 const inputPesquisa = document.getElementById("pesquisa-historico");
 const filtroAno = document.getElementById("filtro-ano");
 const filtroMes = document.getElementById("filtro-mes");
+const filtroTipo = document.getElementById("filtro-tipo");
 
 let historicoCompleto = [];
 
@@ -20,15 +21,48 @@ function formatarMoeda(valor) {
   });
 }
 
+function formatarNumero(valor, casas = 2) {
+  return Number(valor || 0).toLocaleString("pt-BR", {
+    minimumFractionDigits: casas,
+    maximumFractionDigits: casas
+  });
+}
+
 function formatarDataBR(data) {
   if (!data) return "-";
+
   const partes = data.split("-");
   if (partes.length !== 3) return data;
+
   return `${partes[2]}/${partes[1]}/${partes[0]}`;
 }
 
+function nomeMes(numeroMes) {
+  const meses = {
+    "01": "Janeiro",
+    "02": "Fevereiro",
+    "03": "Março",
+    "04": "Abril",
+    "05": "Maio",
+    "06": "Junho",
+    "07": "Julho",
+    "08": "Agosto",
+    "09": "Setembro",
+    "10": "Outubro",
+    "11": "Novembro",
+    "12": "Dezembro"
+  };
+
+  return meses[numeroMes] || numeroMes;
+}
+
 function preencherAnos() {
-  const anos = [...new Set(historicoCompleto.map(item => item.data?.split("-")[0]).filter(Boolean))];
+  const anos = [...new Set(
+    historicoCompleto
+      .map(item => item.data?.split("-")[0])
+      .filter(Boolean)
+  )];
+
   anos.sort((a, b) => b - a);
 
   filtroAno.innerHTML = '<option value="">Todos</option>';
@@ -41,18 +75,16 @@ function preencherAnos() {
   });
 }
 
-function ordenarHistorico(lista) {
-  return lista.sort((a, b) => new Date(b.data) - new Date(a.data));
-}
-
 function criarCard(item) {
   const div = document.createElement("div");
+  div.classList.add("card-historico");
 
-  let detalheValor = "";
+  let detalhePrincipal = "";
+
   if (item.tipo === "Colheita") {
-    detalheValor = `<p><strong>Quantidade:</strong> ${item.quantidade} kg</p>`;
+    detalhePrincipal = `<p><strong>Quantidade:</strong> ${formatarNumero(item.quantidade)} kg</p>`;
   } else {
-    detalheValor = `<p><strong>Valor:</strong> ${formatarMoeda(item.valor)}</p>`;
+    detalhePrincipal = `<p><strong>Valor:</strong> ${formatarMoeda(item.valor)}</p>`;
   }
 
   div.innerHTML = `
@@ -62,10 +94,32 @@ function criarCard(item) {
     <p><strong>Moita:</strong> ${item.moitaNome || "Sem moita específica"}</p>
     ${item.categoria ? `<p><strong>Categoria:</strong> ${item.categoria}</p>` : ""}
     ${item.status ? `<p><strong>Status:</strong> ${item.status}</p>` : ""}
-    ${detalheValor}
+    ${detalhePrincipal}
   `;
 
   return div;
+}
+
+function agruparHistorico(lista) {
+  const grupos = {};
+
+  lista.forEach((item) => {
+    if (!item.data) return;
+
+    const [ano, mes] = item.data.split("-");
+
+    if (!grupos[ano]) {
+      grupos[ano] = {};
+    }
+
+    if (!grupos[ano][mes]) {
+      grupos[ano][mes] = [];
+    }
+
+    grupos[ano][mes].push(item);
+  });
+
+  return grupos;
 }
 
 function renderizarHistorico() {
@@ -74,6 +128,7 @@ function renderizarHistorico() {
   const termo = inputPesquisa.value.trim().toLowerCase();
   const anoSelecionado = filtroAno.value;
   const mesSelecionado = filtroMes.value;
+  const tipoSelecionado = filtroTipo.value;
 
   const filtrado = historicoCompleto.filter((item) => {
     const textoBase = `
@@ -90,20 +145,48 @@ function renderizarHistorico() {
     const batePesquisa = textoBase.includes(termo);
     const bateAno = !anoSelecionado || anoSelecionado === anoItem;
     const bateMes = !mesSelecionado || mesSelecionado === mesItem;
+    const bateTipo = !tipoSelecionado || tipoSelecionado === item.tipo;
 
-    return batePesquisa && bateAno && bateMes;
+    return batePesquisa && bateAno && bateMes && bateTipo;
   });
 
-  const ordenado = ordenarHistorico(filtrado);
-
-  if (ordenado.length === 0) {
+  if (filtrado.length === 0) {
     listaHistorico.innerHTML = "<p>Nenhuma movimentação encontrada.</p>";
     return;
   }
 
-  ordenado.forEach((item) => {
-    const card = criarCard(item);
-    listaHistorico.appendChild(card);
+  const ordenado = filtrado.sort((a, b) => new Date(b.data) - new Date(a.data));
+  const grupos = agruparHistorico(ordenado);
+
+  const anosOrdenados = Object.keys(grupos).sort((a, b) => b - a);
+
+  anosOrdenados.forEach((ano) => {
+    const blocoAno = document.createElement("div");
+    blocoAno.classList.add("bloco-ano");
+
+    const tituloAno = document.createElement("h3");
+    tituloAno.textContent = ano;
+    blocoAno.appendChild(tituloAno);
+
+    const mesesOrdenados = Object.keys(grupos[ano]).sort((a, b) => b.localeCompare(a));
+
+    mesesOrdenados.forEach((mes) => {
+      const blocoMes = document.createElement("div");
+      blocoMes.classList.add("bloco-mes");
+
+      const tituloMes = document.createElement("h4");
+      tituloMes.textContent = nomeMes(mes);
+      blocoMes.appendChild(tituloMes);
+
+      grupos[ano][mes].forEach((item) => {
+        const card = criarCard(item);
+        blocoMes.appendChild(card);
+      });
+
+      blocoAno.appendChild(blocoMes);
+    });
+
+    listaHistorico.appendChild(blocoAno);
   });
 }
 
@@ -114,8 +197,9 @@ async function carregarHistorico(user) {
     collection(db, "usuarios", user.uid, "despesas")
   );
 
-  despesasSnapshot.forEach((doc) => {
-    const despesa = doc.data();
+  despesasSnapshot.forEach((documento) => {
+    const despesa = documento.data();
+
     historicoCompleto.push({
       tipo: "Despesa",
       data: despesa.data,
@@ -130,8 +214,9 @@ async function carregarHistorico(user) {
     collection(db, "usuarios", user.uid, "vendas")
   );
 
-  vendasSnapshot.forEach((doc) => {
-    const venda = doc.data();
+  vendasSnapshot.forEach((documento) => {
+    const venda = documento.data();
+
     historicoCompleto.push({
       tipo: "Venda",
       data: venda.data,
@@ -145,8 +230,9 @@ async function carregarHistorico(user) {
     collection(db, "usuarios", user.uid, "colheitas")
   );
 
-  colheitasSnapshot.forEach((doc) => {
-    const colheita = doc.data();
+  colheitasSnapshot.forEach((documento) => {
+    const colheita = documento.data();
+
     historicoCompleto.push({
       tipo: "Colheita",
       data: colheita.data,
@@ -160,8 +246,9 @@ async function carregarHistorico(user) {
     collection(db, "usuarios", user.uid, "trabalhosCompanheiros")
   );
 
-  trabalhosSnapshot.forEach((doc) => {
-    const trabalho = doc.data();
+  trabalhosSnapshot.forEach((documento) => {
+    const trabalho = documento.data();
+
     historicoCompleto.push({
       tipo: "Trabalho",
       data: trabalho.data,
@@ -186,3 +273,4 @@ async function carregarHistorico(user) {
 inputPesquisa.addEventListener("input", renderizarHistorico);
 filtroAno.addEventListener("change", renderizarHistorico);
 filtroMes.addEventListener("change", renderizarHistorico);
+filtroTipo.addEventListener("change", renderizarHistorico);

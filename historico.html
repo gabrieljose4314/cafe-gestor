@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Histórico de Movimentações</title>
+  <title>Histórico Geral</title>
 
   <link rel="stylesheet" href="style.css">
   <script type="module" src="historico.js"></script>
@@ -13,7 +13,7 @@
     <nav>
       <h1>Painel de Gestão de Café</h1>
       <hr>
-      <h2 class="titulo">Histórico de Movimentações</h2>
+      <h2 class="titulo">Histórico Geral</h2>
     </nav>
   </header>
 
@@ -34,10 +34,10 @@
 
   <main>
     <section>
-      <h3>Filtros</h3>
+      <h3>Filtros do Histórico</h3>
 
       <label for="pesquisa-historico">Pesquisar:</label>
-      <input type="text" id="pesquisa-historico" placeholder="Pesquisar por descrição, moita, categoria, companheiro...">
+      <input type="text" id="pesquisa-historico" placeholder="Digite descrição, moita, categoria, tipo...">
       <br><br>
 
       <label for="filtro-ano">Ano:</label>
@@ -62,10 +62,20 @@
         <option value="11">Novembro</option>
         <option value="12">Dezembro</option>
       </select>
+      <br><br>
+
+      <label for="filtro-tipo">Categoria / Tipo:</label>
+      <select id="filtro-tipo">
+        <option value="">Todos</option>
+        <option value="Despesa">Despesa</option>
+        <option value="Venda">Venda</option>
+        <option value="Colheita">Colheita</option>
+        <option value="Trabalho">Trabalho</option>
+      </select>
     </section>
 
     <section>
-      <h3>Histórico</h3>
+      <h3>Movimentações</h3>
       <div id="lista-historico"></div>
     </section>
   </main>

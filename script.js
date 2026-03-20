@@ -15,14 +15,21 @@ const botaoDetalhes = document.getElementById("toggle-detalhes-despesas");
 const detalhesDespesas = document.getElementById("detalhes-despesas");
 
 function formatarMoeda(valor) {
-  return valor.toLocaleString("pt-BR", {
+  return Number(valor || 0).toLocaleString("pt-BR", {
     style: "currency",
     currency: "BRL"
   });
 }
 
 function formatarKg(valor) {
-  return `${valor.toLocaleString("pt-BR")} kg`;
+  return `${Number(valor || 0).toLocaleString("pt-BR")} kg`;
+}
+
+function formatarSacas(valor) {
+  return `${Number(valor || 0).toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })} sacas`;
 }
 
 async function carregarDadosUsuario(dados) {
@@ -104,11 +111,18 @@ async function carregarResumoFinanceiro(user) {
   totalMoitas = moitasSnapshot.size;
 
   const lucro = ganhoBruto - gastoBruto;
+  const totalColheitaSacas = totalColheita / 60;
 
   document.getElementById("ganho-bruto").textContent = formatarMoeda(ganhoBruto);
   document.getElementById("gasto-bruto").textContent = formatarMoeda(gastoBruto);
   document.getElementById("lucro-total").textContent = formatarMoeda(lucro);
   document.getElementById("total-colheita").textContent = formatarKg(totalColheita);
+
+  const elTotalColheitaSacas = document.getElementById("total-colheita-sacas");
+  if (elTotalColheitaSacas) {
+    elTotalColheitaSacas.textContent = formatarSacas(totalColheitaSacas);
+  }
+
   document.getElementById("pendente-companheiros").textContent = formatarMoeda(pendenteCompanheiros);
   document.getElementById("total-moitas").textContent = totalMoitas;
 

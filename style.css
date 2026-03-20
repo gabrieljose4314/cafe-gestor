@@ -460,6 +460,18 @@ button:hover {
 #lista-usuarios p {
     margin-bottom: 0.4rem;
 }
+#lista-producao h4 {
+    font-size: 1.25rem;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    color: #2d4a2b;
+}
+
+#lista-producao hr {
+    margin: 1rem 0;
+    border: none;
+    border-top: 1px solid #d8cdbd;
+}
 #logout-admin {
     background-color: #a61d1d;
     color: #fff;
@@ -489,7 +501,130 @@ button:hover {
     margin-bottom: 0.5rem;
     font-size: 1.05rem;
 }
+.bloco-ano {
+    margin-bottom: 2rem;
+}
 
+.bloco-ano h3 {
+    margin-bottom: 1rem;
+    color: #2d4a2b;
+    border-bottom: 2px solid #d8cdbd;
+    padding-bottom: 0.4rem;
+}
+
+.bloco-mes {
+    margin-bottom: 1.5rem;
+    padding-left: 0.5rem;
+}
+
+.bloco-mes h4 {
+    margin-bottom: 0.8rem;
+    color: #6f4e37;
+}
+
+.card-historico {
+    background-color: #fcfaf7;
+    border: 1px solid #e0d3c0;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 10px;
+    transition: 0.2s ease;
+}
+
+.card-historico:hover {
+    box-shadow: 0 3px 10px rgba(80, 60, 30, 0.10);
+}
+
+.card-historico p {
+    margin-bottom: 0.4rem;
+}
+.card-colheita {
+    background-color: #fcfaf7;
+    border: 1px solid #e0d3c0;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 10px;
+    transition: 0.2s ease;
+}
+
+.card-colheita:hover {
+    box-shadow: 0 3px 10px rgba(80, 60, 30, 0.10);
+}
+
+.card-colheita p {
+    margin-bottom: 0.4rem;
+}
+
+.btn-excluir-colheita {
+    background-color: #c1121f;
+    color: #fff;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.btn-excluir-colheita:hover {
+    background-color: #9b0d18;
+}
+.card-venda {
+    background-color: #fcfaf7;
+    border: 1px solid #e0d3c0;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 10px;
+    transition: 0.2s ease;
+}
+
+.card-venda:hover {
+    box-shadow: 0 3px 10px rgba(80, 60, 30, 0.10);
+}
+
+.card-venda p {
+    margin-bottom: 0.4rem;
+}
+
+.btn-excluir-venda {
+    background-color: #c1121f;
+    color: #fff;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.btn-excluir-venda:hover {
+    background-color: #9b0d18;
+}
+.card-despesa {
+    background-color: #fcfaf7;
+    border: 1px solid #e0d3c0;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 10px;
+    transition: 0.2s ease;
+}
+
+.card-despesa:hover {
+    box-shadow: 0 3px 10px rgba(80, 60, 30, 0.10);
+}
+
+.card-despesa p {
+    margin-bottom: 0.4rem;
+}
+
+.btn-excluir-despesa {
+    background-color: #c1121f;
+    color: #fff;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.btn-excluir-despesa:hover {
+    background-color: #9b0d18;
+}
 /* =========================
    RESPONSIVO
 ========================= */
