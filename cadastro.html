@@ -3,39 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro de Talhão</title>
+    <title>Cadastro de Moita</title>
 
     <link rel="stylesheet" href="style.css">
     <script type="module" src="cadastro.js"></script>
-    
 </head>
 <body>
     <header>
         <nav>
-            <h1>Painel de Gestão de cafe</h1>
+            <h1>Painel de Gestão de Café</h1>
             <hr>
             <h2 class="titulo">Cadastro de Moita</h2>
-        </nav> 
-
+        </nav>
     </header>
+
     <section class="menu">
         <details>
-            <summary><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
-  <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
-</svg></summary>
+            <summary>☰ Menu</summary>
             <ul>
                 <li><a href="index.html">Painel de Gestão</a></li>
                 <li><a href="producao.html">Produção por Moita</a></li>
                 <li><a href="despesas.html">Gerenciamento de Despesas</a></li>
                 <li><a href="companheiros.html">Gerenciamento de Companheiros</a></li>
-                <li><a href="colheita.html">Gerenciamento de colheita</a></li>
+                <li><a href="colheita.html">Gerenciamento de Colheita</a></li>
                 <li><a href="vendas.html">Gerenciamento de Vendas</a></li>
                 <li><a href="historico.html">Histórico de Movimentações</a></li>
             </ul>
         </details>
     </section>
-    </section>   
-    
+
     <section>
         <h3>Cadastro de Moita</h3>
         <form id="cadastro-moita-form">
@@ -43,7 +39,7 @@
             <input type="text" id="nome-moita" name="nome-moita" required><br><br>
 
             <label for="area-moita">Área (hectares):</label>
-            <input type="number" id="area-moita" name="area-moita" required><br><br>
+            <input type="number" id="area-moita" name="area-moita" step="0.01" required><br><br>
 
             <label for="quantidade-de-pes">Quantidade de Pés:</label>
             <input type="number" id="quantidade-de-pes" name="quantidade-de-pes" required><br><br>
@@ -51,8 +47,13 @@
             <label for="tipo-de-cafe">Tipo de Café:</label>
             <input type="text" id="tipo-de-cafe" name="tipo-de-cafe"><br><br>
 
-            <button type="submit">Cadastrar Moita</button>
+            <button type="submit" id="btn-salvar-moita">Cadastrar Moita</button>
         </form>
+    </section>
+
+    <section>
+        <h3>Moitas Cadastradas</h3>
+        <div id="lista-moitas"></div>
     </section>
 </body>
 </html>

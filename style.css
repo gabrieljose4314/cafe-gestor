@@ -625,6 +625,49 @@ button:hover {
 .btn-excluir-despesa:hover {
     background-color: #9b0d18;
 }
+.card-moita {
+    background-color: #fcfaf7;
+    border: 1px solid #e0d3c0;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 10px;
+    transition: 0.2s ease;
+}
+
+.card-moita:hover {
+    box-shadow: 0 3px 10px rgba(80, 60, 30, 0.10);
+}
+
+.card-moita p {
+    margin-bottom: 0.4rem;
+}
+
+.btn-editar-moita {
+    background-color: #bc6c25;
+    color: #fff;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-right: 8px;
+}
+
+.btn-editar-moita:hover {
+    background-color: #9a571c;
+}
+
+.btn-excluir-moita {
+    background-color: #c1121f;
+    color: #fff;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.btn-excluir-moita:hover {
+    background-color: #9b0d18;
+}
 /* =========================
    RESPONSIVO
 ========================= */
