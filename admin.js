@@ -12,7 +12,9 @@ import {
   updateDoc
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
-const listaUsuarios = document.getElementById("lista-usuarios");
+const listaPendentes = document.getElementById("lista-pendentes-admin");
+const listaAprovados = document.getElementById("lista-aprovados-admin");
+const listaBloqueados = document.getElementById("lista-bloqueados-admin");
 const botaoLogout = document.getElementById("logout-admin");
 
 function criarCardUsuario(id, usuario) {
@@ -25,6 +27,7 @@ function criarCardUsuario(id, usuario) {
   const statusAdmin = acesso.admin ? "Sim" : "Não";
 
   const div = document.createElement("div");
+  div.classList.add("card-admin-usuario");
 
   div.innerHTML = `
     <p><strong>Nome:</strong> ${nome}</p>
@@ -41,20 +44,51 @@ function criarCardUsuario(id, usuario) {
 }
 
 async function carregarUsuarios() {
-  listaUsuarios.innerHTML = "";
+  listaPendentes.innerHTML = "";
+  listaAprovados.innerHTML = "";
+  listaBloqueados.innerHTML = "";
 
   const snapshot = await getDocs(collection(db, "usuarios"));
 
   if (snapshot.empty) {
-    listaUsuarios.innerHTML = "<p>Nenhum usuário encontrado.</p>";
+    listaPendentes.innerHTML = "<p>Nenhum usuário encontrado.</p>";
+    listaAprovados.innerHTML = "<p>Nenhum usuário encontrado.</p>";
+    listaBloqueados.innerHTML = "<p>Nenhum usuário encontrado.</p>";
     return;
   }
 
+  let temPendentes = false;
+  let temAprovados = false;
+  let temBloqueados = false;
+
   snapshot.forEach((documento) => {
     const usuario = documento.data();
+    const acesso = usuario.acesso || {};
     const card = criarCardUsuario(documento.id, usuario);
-    listaUsuarios.appendChild(card);
+
+    if (acesso.bloqueado) {
+      listaBloqueados.appendChild(card);
+      temBloqueados = true;
+    } else if (acesso.aprovado) {
+      listaAprovados.appendChild(card);
+      temAprovados = true;
+    } else {
+      listaPendentes.appendChild(card);
+      temPendentes = true;
+    }
   });
+
+  if (!temPendentes) {
+    listaPendentes.innerHTML = "<p>Nenhuma solicitação pendente.</p>";
+  }
+
+  if (!temAprovados) {
+    listaAprovados.innerHTML = "<p>Nenhum usuário aprovado.</p>";
+  }
+
+  if (!temBloqueados) {
+    listaBloqueados.innerHTML = "<p>Nenhum usuário bloqueado.</p>";
+  }
 
   adicionarEventos();
 }

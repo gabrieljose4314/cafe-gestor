@@ -668,6 +668,22 @@ button:hover {
 .btn-excluir-moita:hover {
     background-color: #9b0d18;
 }
+.card-admin-usuario {
+    background-color: #fcfaf7;
+    border: 1px solid #e0d3c0;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 10px;
+    transition: 0.2s ease;
+}
+
+.card-admin-usuario:hover {
+    box-shadow: 0 3px 10px rgba(80, 60, 30, 0.10);
+}
+
+.card-admin-usuario p {
+    margin-bottom: 0.4rem;
+}
 /* =========================
    RESPONSIVO
 ========================= */
