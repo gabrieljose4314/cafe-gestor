@@ -146,9 +146,27 @@ function adicionarEventosExcluir() {
   const resultado = await exigirUsuarioAprovado();
   if (!resultado) return;
 
+  // VERIFICAÇÃO: Se o plano for básico, remove os elementos da tela
+  const infoUsuario = resultado.dados;
+  if (infoUsuario && infoUsuario.acesso && infoUsuario.acesso.plano === "basico") {
+    // Escolha uma das opções abaixo dependendo de como está o seu HTML:
+
+    // Opção A: Se você usa IDs na página (ex: <div id="historico">)
+    const elHistorico = document.getElementById("historico") || document.getElementById("historico-moitas");
+    const elCompanheiros = document.getElementById("companheiros") || document.getElementById("lista-companheiros");
+    
+    if (elHistorico) elHistorico.style.setProperty("display", "none", "important");
+    if (elCompanheiros) elCompanheiros.style.setProperty("display", "none", "important");
+
+    // Opção B: Se forem classes CSS (ex: <div class="secao-historico">)
+    // const elHistoricoClass = document.querySelector(".historico");
+    // if (elHistoricoClass) elHistoricoClass.style.setProperty("display", "none", "important");
+  }
+
   usuarioAtual = resultado.user;
   await listarMoitas(usuarioAtual);
 })();
+
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();

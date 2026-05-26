@@ -5,9 +5,12 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
 
+// LINKS ARRUMADOS: Importando o collection, getDocs, doc e getDoc da mesma biblioteca oficial
 import {
   collection,
-  getDocs
+  getDocs,
+  doc,
+  getDoc
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
 const botaoLogout = document.getElementById("logout");
@@ -141,8 +144,19 @@ async function carregarResumoFinanceiro(user) {
 
 (async function iniciarPainel() {
   try {
+    // 1. FAZ A LEITURA DO FIREBASE
     const resultado = await exigirUsuarioAprovado();
     if (!resultado) return;
+
+    // Acessa o objeto que você mostrou no print do console
+    const infoUsuario = resultado.dados; 
+    
+    // OPERADOR LÓGICO: Se o plano for igual a 'basico', esconde o que é avançado
+    if (infoUsuario && infoUsuario.acesso && infoUsuario.acesso.plano === "basico") {
+      
+      esconderAbasRestritas();
+    } else {
+    }
 
     await carregarDadosUsuario(resultado.dados);
     await carregarResumoFinanceiro(resultado.user);
@@ -150,6 +164,22 @@ async function carregarResumoFinanceiro(user) {
     console.error("Erro ao carregar painel:", erro);
   }
 })();
+
+// Função que remove o que não pertence ao plano básico
+function esconderAbasRestritas() {
+  const paginasBloqueadas = [ "companheiros.html", "historico.html"];
+  
+  paginasBloqueadas.forEach(pagina => {
+    const link = document.querySelector(`a[href="${pagina}"]`);
+    if (link) {
+      const itemMenu = link.closest("li");
+      if (itemMenu) {
+        itemMenu.style.setProperty("display", "none", "important");
+      }
+    }
+  });
+}
+
 
 if (botaoLogout) {
   botaoLogout.addEventListener("click", async () => {

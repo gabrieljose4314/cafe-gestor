@@ -26,6 +26,9 @@ function criarCardUsuario(id, usuario) {
   const statusBloqueado = acesso.bloqueado ? "Bloqueado" : "Ativo";
   const statusAdmin = acesso.admin ? "Sim" : "Não";
 
+  // Plano atual salvo no Firestore (padrão: "basico")
+  const planoAtual = acesso.plano || "basico";
+
   const div = document.createElement("div");
   div.classList.add("card-admin-usuario");
 
@@ -35,9 +38,17 @@ function criarCardUsuario(id, usuario) {
     <p><strong>Aprovado:</strong> ${statusAprovado}</p>
     <p><strong>Bloqueado:</strong> ${statusBloqueado}</p>
     <p><strong>Admin:</strong> ${statusAdmin}</p>
-    <button class="btn-aprovar" data-id="${id}">Aprovar</button>
-    <button class="btn-bloquear" data-id="${id}">Bloquear</button>
-    <button class="btn-desbloquear" data-id="${id}">Desbloquear</button>
+
+    <label for="plano-${id}"><strong>Plano:</strong></label>
+    <select id="plano-${id}" data-id="${id}" class="select-plano">
+      <option value="basico"   ${planoAtual === "basico"    ? "selected" : ""}>Básico</option>
+      <option value="completo" ${planoAtual === "completo"  ? "selected" : ""}>Completo</option>
+    </select>
+    <button class="btn-salvar-plano" data-id="${id}">Salvar Plano</button>
+
+    <button class="btn-aprovar"      data-id="${id}">Aprovar</button>
+    <button class="btn-bloquear"     data-id="${id}">Bloquear</button>
+    <button class="btn-desbloquear"  data-id="${id}">Desbloquear</button>
   `;
 
   return div;
@@ -52,19 +63,19 @@ async function carregarUsuarios() {
 
   if (snapshot.empty) {
     listaPendentes.innerHTML = "<p>Nenhum usuário encontrado.</p>";
-    listaAprovados.innerHTML = "<p>Nenhum usuário encontrado.</p>";
+    listaAprovados.innerHTML  = "<p>Nenhum usuário encontrado.</p>";
     listaBloqueados.innerHTML = "<p>Nenhum usuário encontrado.</p>";
     return;
   }
 
-  let temPendentes = false;
-  let temAprovados = false;
+  let temPendentes  = false;
+  let temAprovados  = false;
   let temBloqueados = false;
 
   snapshot.forEach((documento) => {
     const usuario = documento.data();
-    const acesso = usuario.acesso || {};
-    const card = criarCardUsuario(documento.id, usuario);
+    const acesso  = usuario.acesso || {};
+    const card    = criarCardUsuario(documento.id, usuario);
 
     if (acesso.bloqueado) {
       listaBloqueados.appendChild(card);
@@ -78,33 +89,40 @@ async function carregarUsuarios() {
     }
   });
 
-  if (!temPendentes) {
-    listaPendentes.innerHTML = "<p>Nenhuma solicitação pendente.</p>";
-  }
-
-  if (!temAprovados) {
-    listaAprovados.innerHTML = "<p>Nenhum usuário aprovado.</p>";
-  }
-
-  if (!temBloqueados) {
-    listaBloqueados.innerHTML = "<p>Nenhum usuário bloqueado.</p>";
-  }
+  if (!temPendentes)  listaPendentes.innerHTML = "<p>Nenhuma solicitação pendente.</p>";
+  if (!temAprovados)  listaAprovados.innerHTML  = "<p>Nenhum usuário aprovado.</p>";
+  if (!temBloqueados) listaBloqueados.innerHTML = "<p>Nenhum usuário bloqueado.</p>";
 
   adicionarEventos();
 }
 
 function adicionarEventos() {
-  const botoesAprovar = document.querySelectorAll(".btn-aprovar");
-  const botoesBloquear = document.querySelectorAll(".btn-bloquear");
-  const botoesDesbloquear = document.querySelectorAll(".btn-desbloquear");
-
-  botoesAprovar.forEach((botao) => {
+  // ── Salvar plano ──
+  document.querySelectorAll(".btn-salvar-plano").forEach((botao) => {
     botao.addEventListener("click", async () => {
       const userId = botao.getAttribute("data-id");
+      const select = document.getElementById(`plano-${userId}`);
+      const planoEscolhido = select.value;
+
+      await updateDoc(doc(db, "usuarios", userId), {
+        "acesso.plano": planoEscolhido
+      });
+
+      alert(`Plano atualizado para "${planoEscolhido}" com sucesso!`);
+    });
+  });
+
+  // ── Aprovar ──
+  document.querySelectorAll(".btn-aprovar").forEach((botao) => {
+    botao.addEventListener("click", async () => {
+      const userId = botao.getAttribute("data-id");
+      const select = document.getElementById(`plano-${userId}`);
+      const planoEscolhido = select ? select.value : "basico";
 
       await updateDoc(doc(db, "usuarios", userId), {
         "acesso.aprovado": true,
-        "acesso.bloqueado": false
+        "acesso.bloqueado": false,
+        "acesso.plano": planoEscolhido   // salva o plano junto ao aprovar
       });
 
       alert("Usuário aprovado com sucesso!");
@@ -112,7 +130,8 @@ function adicionarEventos() {
     });
   });
 
-  botoesBloquear.forEach((botao) => {
+  // ── Bloquear ──
+  document.querySelectorAll(".btn-bloquear").forEach((botao) => {
     botao.addEventListener("click", async () => {
       const userId = botao.getAttribute("data-id");
 
@@ -125,7 +144,8 @@ function adicionarEventos() {
     });
   });
 
-  botoesDesbloquear.forEach((botao) => {
+  // ── Desbloquear ──
+  document.querySelectorAll(".btn-desbloquear").forEach((botao) => {
     botao.addEventListener("click", async () => {
       const userId = botao.getAttribute("data-id");
 

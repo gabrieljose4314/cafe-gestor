@@ -411,15 +411,29 @@ function adicionarEventosBotoesExcluirCompanheiro() {
   });
 }
 
+// ── Início — única mudança: verificação de plano antes de carregar tudo ───────
 (async function iniciarCompanheiros() {
-  const resultado = await exigirUsuarioAprovado();
-  if (!resultado) return;
+  try {
+    const resultado = await exigirUsuarioAprovado();
+    if (!resultado) return;
 
-  usuarioAtual = resultado.user;
+    const plano = resultado.dados?.acesso?.plano || "basico";
+    if (plano !== "completo") {
+      alert("Seu plano não tem acesso a esta página.\nFaça upgrade para o plano Completo!");
+      window.location.href = "index.html";
+      return;
+    }
 
-  await carregarCompanheiros(usuarioAtual);
-  await carregarMoitas(usuarioAtual);
-  await buscarTrabalhos(usuarioAtual);
+    usuarioAtual = resultado.user;
+
+    await carregarCompanheiros(usuarioAtual);
+    await carregarMoitas(usuarioAtual);
+    await buscarTrabalhos(usuarioAtual);
+
+  } catch (erro) {
+    console.error("Erro ao iniciar página de companheiros:", erro);
+    window.location.href = "index.html";
+  }
 })();
 
 formCompanheiro.addEventListener("submit", async (e) => {
