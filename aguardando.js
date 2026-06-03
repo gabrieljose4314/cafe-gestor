@@ -31,13 +31,6 @@ onAuthStateChanged(auth, (user) => {
 
       const acesso = snap.data().acesso || {};
 
-      if (acesso.bloqueado) {
-        clearInterval(intervalo);
-        await signOut(auth);
-        window.location.href = "login.html";
-        return;
-      }
-
       if (acesso.aprovado) {
         clearInterval(intervalo);
         window.location.href = "index.html";
