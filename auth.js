@@ -13,6 +13,12 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
 const provider = new GoogleAuthProvider();
+
+// Força sempre abrir a tela de seleção de conta do Google
+provider.setCustomParameters({
+  prompt: "select_account"
+});
+
 const btnLogin = document.getElementById("login-btn");
 
 async function fazerLoginComGoogle() {
