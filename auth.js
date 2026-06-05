@@ -3,6 +3,8 @@ import { auth, db } from "./firebase.js";
 import {
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
 
@@ -21,9 +23,15 @@ provider.setCustomParameters({
 
 const btnLogin = document.getElementById("login-btn");
 
+const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
 async function fazerLoginComGoogle() {
   try {
-    await signInWithPopup(auth, provider);
+    if (isMobile) {
+      await signInWithRedirect(auth, provider);
+    } else {
+      await signInWithPopup(auth, provider);
+    }
   } catch (error) {
     console.error("Erro no login:", error);
     alert("Erro ao entrar com Google. Tente novamente.");
@@ -66,8 +74,37 @@ async function criarUsuarioSeNaoExistir(user) {
   };
 }
 
+async function redirecionarUsuario(acesso) {
+  if (acesso.bloqueado) {
+    window.location.href = "bloqueado.html";
+    return;
+  }
+  if (acesso.admin === true) {
+    window.location.href = "admin.html";
+    return;
+  }
+  if (acesso.aprovado === true) {
+    window.location.href = "index.html";
+    return;
+  }
+  window.location.href = "aguardando.html";
+}
+
 if (btnLogin) {
   btnLogin.addEventListener("click", fazerLoginComGoogle);
+}
+
+// Captura o resultado do redirect no mobile
+if (isMobile) {
+  getRedirectResult(auth)
+    .then(async (result) => {
+      if (!result) return;
+      const acesso = await criarUsuarioSeNaoExistir(result.user);
+      await redirecionarUsuario(acesso);
+    })
+    .catch((error) => {
+      console.error("Erro no redirect:", error);
+    });
 }
 
 onAuthStateChanged(auth, async (user) => {
@@ -75,28 +112,7 @@ onAuthStateChanged(auth, async (user) => {
 
   try {
     const acesso = await criarUsuarioSeNaoExistir(user);
-
-    // 1. bloqueado sempre perde prioridade
-    if (acesso.bloqueado) {
-      window.location.href = "bloqueado.html";
-      return;
-    }
-
-    // 2. admin sempre entra no admin, mesmo se aprovado estiver false
-    if (acesso.admin === true) {
-      window.location.href = "admin.html";
-      return;
-    }
-
-    // 3. usuário comum aprovado entra no painel
-    if (acesso.aprovado === true) {
-      window.location.href = "index.html";
-      return;
-    }
-
-    // 4. se não for admin e não estiver aprovado
-    window.location.href = "aguardando.html";
-
+    await redirecionarUsuario(acesso);
   } catch (error) {
     console.error("Erro ao verificar acesso:", error);
     alert("Erro ao acessar sua conta.");
