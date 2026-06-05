@@ -13,7 +13,6 @@ import {
 const formCompanheiro = document.getElementById("cadastro-companheiro-form");
 const formTrabalho = document.getElementById("registro-trabalho-form");
 
-const selectCompanheiro = document.getElementById("companheiro-trabalho");
 const selectMoita = document.getElementById("moita-trabalho");
 
 const listaCompanheiros = document.getElementById("lista-companheiros");
@@ -46,10 +45,8 @@ function obterDataHoje() {
 
 function formatarDataBR(data) {
   if (!data) return "-";
-
   const partes = data.split("-");
   if (partes.length !== 3) return data;
-
   return `${partes[2]}/${partes[1]}/${partes[0]}`;
 }
 
@@ -66,7 +63,6 @@ async function lancarDespesaDePagamento(trabalho, dataPagamento) {
       criadoEm: new Date()
     }
   );
-
   return despesaRef.id;
 }
 
@@ -92,10 +88,10 @@ function criarCardTrabalho(trabalho, trabalhoId) {
     }
     <button data-id="${trabalhoId}" class="btn-excluir-trabalho">Excluir</button>
   `;
-
   return div;
 }
 
+// ── Lista de companheiros dentro de <details> (oculta por padrão) ─────────────
 function renderizarListaCompanheiros() {
   listaCompanheiros.innerHTML = "";
 
@@ -103,6 +99,11 @@ function renderizarListaCompanheiros() {
     listaCompanheiros.innerHTML = "<p>Nenhum companheiro cadastrado.</p>";
     return;
   }
+
+  const details = document.createElement("details");
+  const summary = document.createElement("summary");
+  summary.textContent = `Ver companheiros cadastrados (${todosOsCompanheiros.length})`;
+  details.appendChild(summary);
 
   todosOsCompanheiros.forEach((companheiro) => {
     const div = document.createElement("div");
@@ -112,35 +113,40 @@ function renderizarListaCompanheiros() {
       <p><strong>Observação:</strong> ${companheiro.observacao || "-"}</p>
       <button data-id="${companheiro.id}" class="btn-excluir-companheiro">Excluir companheiro</button>
     `;
-
-    listaCompanheiros.appendChild(div);
+    details.appendChild(div);
   });
 
+  listaCompanheiros.appendChild(details);
   adicionarEventosBotoesExcluirCompanheiro();
 }
 
+// ── Carrega companheiros e monta checkboxes pra seleção múltipla ──────────────
 async function carregarCompanheiros(user) {
   try {
-    selectCompanheiro.innerHTML = '<option value="">Selecione um companheiro</option>';
     todosOsCompanheiros = [];
+
+    const container = document.getElementById("companheiros-checkboxes");
+    if (container) container.innerHTML = "";
 
     const snapshot = await getDocs(
       collection(db, "usuarios", user.uid, "companheiros")
     );
 
     snapshot.forEach((documento) => {
-      const companheiro = {
-        id: documento.id,
-        ...documento.data()
-      };
-
+      const companheiro = { id: documento.id, ...documento.data() };
       todosOsCompanheiros.push(companheiro);
 
-      const option = document.createElement("option");
-      option.value = documento.id;
-      option.textContent = companheiro.nome;
-
-      selectCompanheiro.appendChild(option);
+      if (container) {
+        const label = document.createElement("label");
+        label.style.cssText = "display:flex;align-items:center;gap:8px;margin-bottom:8px;cursor:pointer;font-size:1rem;color:#2f2f2f;";
+        label.innerHTML = `
+          <input type="checkbox" class="checkbox-companheiro" value="${companheiro.id}"
+            data-nome="${companheiro.nome}"
+            data-telefone="${companheiro.telefone || ""}">
+          ${companheiro.nome}${companheiro.telefone ? ` — ${companheiro.telefone}` : ""}
+        `;
+        container.appendChild(label);
+      }
     });
 
     renderizarListaCompanheiros();
@@ -159,11 +165,9 @@ async function carregarMoitas(user) {
 
     snapshot.forEach((documento) => {
       const moita = documento.data();
-
       const option = document.createElement("option");
       option.value = documento.id;
       option.textContent = moita.nome;
-
       selectMoita.appendChild(option);
     });
   } catch (erro) {
@@ -176,16 +180,10 @@ async function buscarTrabalhos(user) {
     const snapshot = await getDocs(
       collection(db, "usuarios", user.uid, "trabalhosCompanheiros")
     );
-
     todosOsTrabalhos = [];
-
     snapshot.forEach((documento) => {
-      todosOsTrabalhos.push({
-        id: documento.id,
-        ...documento.data()
-      });
+      todosOsTrabalhos.push({ id: documento.id, ...documento.data() });
     });
-
     renderizarTrabalhos();
   } catch (erro) {
     console.error("Erro ao buscar trabalhos:", erro);
@@ -193,19 +191,11 @@ async function buscarTrabalhos(user) {
 }
 
 function ordenarPendentes(lista) {
-  return lista.sort((a, b) => {
-    const dataA = new Date(a.data || "1900-01-01");
-    const dataB = new Date(b.data || "1900-01-01");
-    return dataB - dataA;
-  });
+  return lista.sort((a, b) => new Date(b.data || "1900-01-01") - new Date(a.data || "1900-01-01"));
 }
 
 function ordenarPagos(lista) {
-  return lista.sort((a, b) => {
-    const dataA = new Date(a.dataPagamento || "1900-01-01");
-    const dataB = new Date(b.dataPagamento || "1900-01-01");
-    return dataB - dataA;
-  });
+  return lista.sort((a, b) => new Date(b.dataPagamento || "1900-01-01") - new Date(a.dataPagamento || "1900-01-01"));
 }
 
 function renderizarTrabalhos() {
@@ -222,32 +212,32 @@ function renderizarTrabalhos() {
     return nome.includes(termoPesquisa);
   });
 
-  const pendentes = ordenarPendentes(
-    trabalhosFiltrados.filter((trabalho) => trabalho.statusPagamento === "pendente")
-  );
-
-  const pagos = ordenarPagos(
-    trabalhosFiltrados.filter((trabalho) => trabalho.statusPagamento === "pago")
-  );
+  const pendentes = ordenarPendentes(trabalhosFiltrados.filter(t => t.statusPagamento === "pendente"));
+  const pagos = ordenarPagos(trabalhosFiltrados.filter(t => t.statusPagamento === "pago"));
 
   if (pendentes.length === 0) {
     listaPendentes.innerHTML = "<p>Nenhum pagamento pendente encontrado.</p>";
   } else {
     pendentes.forEach((trabalho) => {
       totalPendente += Number(trabalho.valor) || 0;
-      const card = criarCardTrabalho(trabalho, trabalho.id);
-      listaPendentes.appendChild(card);
+      listaPendentes.appendChild(criarCardTrabalho(trabalho, trabalho.id));
     });
   }
 
   if (pagos.length === 0) {
     listaPagos.innerHTML = "<p>Nenhum pagamento realizado encontrado.</p>";
   } else {
+    const details = document.createElement("details");
+    const summary = document.createElement("summary");
+
     pagos.forEach((trabalho) => {
       totalPago += Number(trabalho.valor) || 0;
-      const card = criarCardTrabalho(trabalho, trabalho.id);
-      listaPagos.appendChild(card);
+      details.appendChild(criarCardTrabalho(trabalho, trabalho.id));
     });
+
+    summary.textContent = `Ver pagamentos realizados (${pagos.length})`;
+    details.insertBefore(summary, details.firstChild);
+    listaPagos.appendChild(details);
   }
 
   totalPendenteEl.textContent = formatarMoeda(totalPendente);
@@ -259,40 +249,22 @@ function renderizarTrabalhos() {
 }
 
 function adicionarEventosBotoesPagamento() {
-  const botoes = document.querySelectorAll(".btn-marcar-pago");
-
-  botoes.forEach((botao) => {
+  document.querySelectorAll(".btn-marcar-pago").forEach((botao) => {
     botao.addEventListener("click", async () => {
       const trabalhoId = botao.getAttribute("data-id");
-
       try {
-        const trabalho = todosOsTrabalhos.find((item) => item.id === trabalhoId);
-
-        if (!trabalho) {
-          alert("Trabalho não encontrado.");
-          return;
-        }
-
+        const trabalho = todosOsTrabalhos.find(item => item.id === trabalhoId);
+        if (!trabalho) { alert("Trabalho não encontrado."); return; }
         if (trabalho.lancadoComoDespesa || trabalho.despesaId) {
-          alert("Este pagamento já foi lançado nas despesas.");
-          return;
+          alert("Este pagamento já foi lançado nas despesas."); return;
         }
-
         const dataPagamento = obterDataHoje();
         const despesaId = await lancarDespesaDePagamento(trabalho, dataPagamento);
-
-        const ref = doc(db, "usuarios", usuarioAtual.uid, "trabalhosCompanheiros", trabalhoId);
-
-        await updateDoc(ref, {
-          statusPagamento: "pago",
-          dataPagamento: dataPagamento,
-          lancadoComoDespesa: true,
-          despesaId: despesaId
+        await updateDoc(doc(db, "usuarios", usuarioAtual.uid, "trabalhosCompanheiros", trabalhoId), {
+          statusPagamento: "pago", dataPagamento, lancadoComoDespesa: true, despesaId
         });
-
         alert("Pagamento marcado como pago e lançado nas despesas!");
         await buscarTrabalhos(usuarioAtual);
-
       } catch (erro) {
         console.error("Erro ao atualizar pagamento:", erro);
         alert("Erro ao atualizar pagamento");
@@ -302,40 +274,21 @@ function adicionarEventosBotoesPagamento() {
 }
 
 function adicionarEventosBotoesVoltarPendente() {
-  const botoes = document.querySelectorAll(".btn-voltar-pendente");
-
-  botoes.forEach((botao) => {
+  document.querySelectorAll(".btn-voltar-pendente").forEach((botao) => {
     botao.addEventListener("click", async () => {
       const trabalhoId = botao.getAttribute("data-id");
-
-      const confirmar = confirm("Tem certeza que deseja voltar este pagamento para pendente?");
-      if (!confirmar) return;
-
+      if (!confirm("Tem certeza que deseja voltar este pagamento para pendente?")) return;
       try {
-        const trabalho = todosOsTrabalhos.find((item) => item.id === trabalhoId);
-
-        if (!trabalho) {
-          alert("Trabalho não encontrado.");
-          return;
-        }
-
+        const trabalho = todosOsTrabalhos.find(item => item.id === trabalhoId);
+        if (!trabalho) { alert("Trabalho não encontrado."); return; }
         if (trabalho.despesaId) {
-          const despesaRef = doc(db, "usuarios", usuarioAtual.uid, "despesas", trabalho.despesaId);
-          await deleteDoc(despesaRef);
+          await deleteDoc(doc(db, "usuarios", usuarioAtual.uid, "despesas", trabalho.despesaId));
         }
-
-        const ref = doc(db, "usuarios", usuarioAtual.uid, "trabalhosCompanheiros", trabalhoId);
-
-        await updateDoc(ref, {
-          statusPagamento: "pendente",
-          dataPagamento: null,
-          lancadoComoDespesa: false,
-          despesaId: null
+        await updateDoc(doc(db, "usuarios", usuarioAtual.uid, "trabalhosCompanheiros", trabalhoId), {
+          statusPagamento: "pendente", dataPagamento: null, lancadoComoDespesa: false, despesaId: null
         });
-
         alert("Pagamento voltou para pendente com sucesso!");
         await buscarTrabalhos(usuarioAtual);
-
       } catch (erro) {
         console.error("Erro ao voltar pagamento para pendente:", erro);
         alert("Erro ao voltar pagamento para pendente");
@@ -345,29 +298,18 @@ function adicionarEventosBotoesVoltarPendente() {
 }
 
 function adicionarEventosBotoesExcluirTrabalho() {
-  const botoes = document.querySelectorAll(".btn-excluir-trabalho");
-
-  botoes.forEach((botao) => {
+  document.querySelectorAll(".btn-excluir-trabalho").forEach((botao) => {
     botao.addEventListener("click", async () => {
       const trabalhoId = botao.getAttribute("data-id");
-
-      const confirmar = confirm("Tem certeza que deseja excluir este registro?");
-      if (!confirmar) return;
-
+      if (!confirm("Tem certeza que deseja excluir este registro?")) return;
       try {
-        const trabalho = todosOsTrabalhos.find((item) => item.id === trabalhoId);
-
+        const trabalho = todosOsTrabalhos.find(item => item.id === trabalhoId);
         if (trabalho?.despesaId) {
-          const despesaRef = doc(db, "usuarios", usuarioAtual.uid, "despesas", trabalho.despesaId);
-          await deleteDoc(despesaRef);
+          await deleteDoc(doc(db, "usuarios", usuarioAtual.uid, "despesas", trabalho.despesaId));
         }
-
-        const ref = doc(db, "usuarios", usuarioAtual.uid, "trabalhosCompanheiros", trabalhoId);
-        await deleteDoc(ref);
-
+        await deleteDoc(doc(db, "usuarios", usuarioAtual.uid, "trabalhosCompanheiros", trabalhoId));
         alert("Registro excluído com sucesso!");
         await buscarTrabalhos(usuarioAtual);
-
       } catch (erro) {
         console.error("Erro ao excluir registro:", erro);
         alert("Erro ao excluir registro");
@@ -377,32 +319,19 @@ function adicionarEventosBotoesExcluirTrabalho() {
 }
 
 function adicionarEventosBotoesExcluirCompanheiro() {
-  const botoes = document.querySelectorAll(".btn-excluir-companheiro");
-
-  botoes.forEach((botao) => {
+  document.querySelectorAll(".btn-excluir-companheiro").forEach((botao) => {
     botao.addEventListener("click", async () => {
       const companheiroId = botao.getAttribute("data-id");
-
-      const companheiroTemTrabalho = todosOsTrabalhos.some(
-        (trabalho) => trabalho.companheiroId === companheiroId
-      );
-
-      if (companheiroTemTrabalho) {
+      const temTrabalho = todosOsTrabalhos.some(t => t.companheiroId === companheiroId);
+      if (temTrabalho) {
         alert("Não é possível excluir este companheiro porque ele possui trabalhos cadastrados.");
         return;
       }
-
-      const confirmar = confirm("Tem certeza que deseja excluir este companheiro?");
-      if (!confirmar) return;
-
+      if (!confirm("Tem certeza que deseja excluir este companheiro?")) return;
       try {
-        const ref = doc(db, "usuarios", usuarioAtual.uid, "companheiros", companheiroId);
-
-        await deleteDoc(ref);
-
+        await deleteDoc(doc(db, "usuarios", usuarioAtual.uid, "companheiros", companheiroId));
         alert("Companheiro excluído com sucesso!");
         await carregarCompanheiros(usuarioAtual);
-
       } catch (erro) {
         console.error("Erro ao excluir companheiro:", erro);
         alert("Erro ao excluir companheiro");
@@ -411,7 +340,7 @@ function adicionarEventosBotoesExcluirCompanheiro() {
   });
 }
 
-// ── Início — única mudança: verificação de plano antes de carregar tudo ───────
+// ── Início ────────────────────────────────────────────────────────────────────
 (async function iniciarCompanheiros() {
   try {
     const resultado = await exigirUsuarioAprovado();
@@ -436,9 +365,9 @@ function adicionarEventosBotoesExcluirCompanheiro() {
   }
 })();
 
+// ── Cadastro de companheiro ───────────────────────────────────────────────────
 formCompanheiro.addEventListener("submit", async (e) => {
   e.preventDefault();
-
   if (!usuarioAtual) return;
 
   const nome = document.getElementById("nome-companheiro").value;
@@ -446,94 +375,71 @@ formCompanheiro.addEventListener("submit", async (e) => {
   const observacao = document.getElementById("observacao-companheiro").value;
 
   try {
-    await addDoc(
-      collection(db, "usuarios", usuarioAtual.uid, "companheiros"),
-      {
-        nome: nome,
-        telefone: telefone || null,
-        observacao: observacao || null,
-        criadoEm: new Date()
-      }
-    );
-
+    await addDoc(collection(db, "usuarios", usuarioAtual.uid, "companheiros"), {
+      nome, telefone: telefone || null, observacao: observacao || null, criadoEm: new Date()
+    });
     alert("Companheiro cadastrado com sucesso!");
     formCompanheiro.reset();
     await carregarCompanheiros(usuarioAtual);
-
   } catch (erro) {
     console.error("Erro ao cadastrar companheiro:", erro);
     alert("Erro ao cadastrar companheiro");
   }
 });
 
+// ── Registro de trabalho com múltiplos companheiros ───────────────────────────
 formTrabalho.addEventListener("submit", async (e) => {
   e.preventDefault();
-
   if (!usuarioAtual) return;
 
-  const companheiroId = selectCompanheiro.value;
-  const companheiroNome = selectCompanheiro.options[selectCompanheiro.selectedIndex].text;
+  const checkboxesMarcados = document.querySelectorAll(".checkbox-companheiro:checked");
 
-  const companheiroSelecionado = todosOsCompanheiros.find(
-    (companheiro) => companheiro.id === companheiroId
-  );
-
-  const companheiroTelefone = companheiroSelecionado?.telefone || null;
-
-  const moitaId = selectMoita.value;
-  const moitaNome = moitaId
-    ? selectMoita.options[selectMoita.selectedIndex].text
-    : null;
-
-  const data = document.getElementById("data-trabalho").value;
-  const servico = document.getElementById("servico-trabalho").value;
-  const valor = document.getElementById("valor-trabalho").value;
-  const statusPagamento = document.getElementById("status-pagamento").value;
-  const observacao = document.getElementById("observacao-trabalho").value;
-
-  if (!companheiroId) {
-    alert("Selecione um companheiro");
+  if (checkboxesMarcados.length === 0) {
+    alert("Selecione pelo menos um companheiro.");
     return;
   }
 
+  const moitaId   = selectMoita.value;
+  const moitaNome = moitaId ? selectMoita.options[selectMoita.selectedIndex].text : null;
+  const data      = document.getElementById("data-trabalho").value;
+  const servico   = document.getElementById("servico-trabalho").value;
+  const valor     = document.getElementById("valor-trabalho").value;
+  const statusPagamento = document.getElementById("status-pagamento").value;
+  const observacao      = document.getElementById("observacao-trabalho").value;
+  const dataPagamento   = statusPagamento === "pago" ? obterDataHoje() : null;
+
   try {
-    const dataPagamento = statusPagamento === "pago" ? obterDataHoje() : null;
+    for (const checkbox of checkboxesMarcados) {
+      const companheiroId       = checkbox.value;
+      const companheiroNome     = checkbox.getAttribute("data-nome");
+      const companheiroTelefone = checkbox.getAttribute("data-telefone") || null;
 
-    const trabalhoBase = {
-      companheiroId: companheiroId,
-      companheiroNome: companheiroNome,
-      companheiroTelefone: companheiroTelefone,
-      moitaId: moitaId || null,
-      moitaNome: moitaNome || null,
-      data: data,
-      servico: servico,
-      valor: Number(valor),
-      statusPagamento: statusPagamento,
-      dataPagamento: dataPagamento,
-      lancadoComoDespesa: false,
-      despesaId: null,
-      observacao: observacao || null,
-      criadoEm: new Date()
-    };
+      const trabalhoBase = {
+        companheiroId, companheiroNome, companheiroTelefone,
+        moitaId: moitaId || null, moitaNome: moitaNome || null,
+        data, servico, valor: Number(valor),
+        statusPagamento, dataPagamento,
+        lancadoComoDespesa: false, despesaId: null,
+        observacao: observacao || null, criadoEm: new Date()
+      };
 
-    const trabalhoRef = await addDoc(
-      collection(db, "usuarios", usuarioAtual.uid, "trabalhosCompanheiros"),
-      trabalhoBase
-    );
+      const trabalhoRef = await addDoc(
+        collection(db, "usuarios", usuarioAtual.uid, "trabalhosCompanheiros"),
+        trabalhoBase
+      );
 
-    if (statusPagamento === "pago") {
-      const despesaId = await lancarDespesaDePagamento(trabalhoBase, dataPagamento);
-
-      const ref = doc(db, "usuarios", usuarioAtual.uid, "trabalhosCompanheiros", trabalhoRef.id);
-
-      await updateDoc(ref, {
-        lancadoComoDespesa: true,
-        despesaId: despesaId
-      });
+      if (statusPagamento === "pago") {
+        const despesaId = await lancarDespesaDePagamento(trabalhoBase, dataPagamento);
+        await updateDoc(
+          doc(db, "usuarios", usuarioAtual.uid, "trabalhosCompanheiros", trabalhoRef.id),
+          { lancadoComoDespesa: true, despesaId }
+        );
+      }
     }
 
-    alert("Trabalho registrado com sucesso!");
+    alert(`Trabalho registrado para ${checkboxesMarcados.length} companheiro(s) com sucesso!`);
     formTrabalho.reset();
+    document.querySelectorAll(".checkbox-companheiro").forEach(cb => cb.checked = false);
     await buscarTrabalhos(usuarioAtual);
 
   } catch (erro) {
@@ -545,3 +451,36 @@ formTrabalho.addEventListener("submit", async (e) => {
 inputPesquisa.addEventListener("input", () => {
   renderizarTrabalhos();
 });
+
+// ── Modal de seleção de companheiros ──────────────────────────────────────────
+const modal = document.getElementById("modal-companheiros");
+const btnAbrirModal = document.getElementById("btn-abrir-modal-companheiros");
+const btnConfirmar = document.getElementById("btn-confirmar-companheiros");
+const resumoSelecionados = document.getElementById("resumo-selecionados");
+
+btnAbrirModal.addEventListener("click", () => {
+  modal.style.display = "flex";
+});
+
+btnConfirmar.addEventListener("click", () => {
+  modal.style.display = "none";
+  atualizarResumoSelecionados();
+});
+
+// Fecha ao clicar fora do card
+modal.addEventListener("click", (e) => {
+  if (e.target === modal) {
+    modal.style.display = "none";
+    atualizarResumoSelecionados();
+  }
+});
+
+function atualizarResumoSelecionados() {
+  const marcados = [...document.querySelectorAll(".checkbox-companheiro:checked")];
+  if (marcados.length === 0) {
+    resumoSelecionados.textContent = "Nenhum companheiro selecionado.";
+  } else {
+    const nomes = marcados.map(cb => cb.getAttribute("data-nome")).join(", ");
+    resumoSelecionados.textContent = `✅ ${marcados.length} selecionado(s): ${nomes}`;
+  }
+}

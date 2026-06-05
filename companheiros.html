@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="manifest" href="./manifest.json">
-<link rel="icon" type="image/png" href="./img/logo-192.png">
-<link rel="apple-touch-icon" href="./img/logo-192.png">
-<meta name="theme-color" content="#2d4a2b">
+  <link rel="icon" type="image/png" href="./img/logo-192.png">
+  <link rel="apple-touch-icon" href="./img/logo-192.png">
+  <meta name="theme-color" content="#2d4a2b">
   <title>Companheiros</title>
 
   <link rel="stylesheet" href="style.css" />
-  <script type="module" src="companheiros.js?v=1.5"></script>
+  <script type="module" src="companheiros.js?v=1.53"></script>
 </head>
 <body>
   <header>
@@ -68,11 +68,39 @@
     <section>
       <h3>Registrar Trabalho</h3>
       <form id="registro-trabalho-form">
-        <label for="companheiro-trabalho">Companheiro:</label>
-        <select id="companheiro-trabalho" required>
-          <option value="">Selecione um companheiro</option>
-        </select>
-        <br><br>
+
+        <label>Companheiros:</label><br>
+        <button type="button" id="btn-abrir-modal-companheiros">Selecionar Companheiros</button>
+        <div id="resumo-selecionados" style="margin-top:8px;font-size:0.9rem;color:#4a3728;"></div>
+        <br>
+
+        <!-- Modal de seleção de companheiros -->
+        <div id="modal-companheiros" style="
+          display:none;
+          position:fixed;
+          inset:0;
+          background:rgba(0,0,0,0.5);
+          z-index:1000;
+          align-items:center;
+          justify-content:center;
+        ">
+          <div style="
+            background:#fff;
+            border-radius:12px;
+            padding:1.5rem;
+            width:90%;
+            max-width:420px;
+            box-shadow:0 8px 32px rgba(0,0,0,0.2);
+          ">
+            <h3 style="color:#2d4a2b;margin-bottom:1rem;">Selecione os Companheiros</h3>
+            <div id="companheiros-checkboxes" style="
+              max-height:260px;
+              overflow-y:auto;
+              margin-bottom:1rem;
+            "></div>
+            <button type="button" id="btn-confirmar-companheiros">Confirmar</button>
+          </div>
+        </div>
 
         <label for="moita-trabalho">Moita:</label>
         <select id="moita-trabalho">
