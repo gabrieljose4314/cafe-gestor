@@ -4,31 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="manifest" href="./manifest.json">
-<link rel="icon" type="image/png" href="./img/logo-192.png">
-<link rel="apple-touch-icon" href="./img/logo-192.png">
-<meta name="theme-color" content="#2d4a2b">
+    <link rel="icon" type="image/png" href="./img/logo-192.png">
+    <link rel="apple-touch-icon" href="./img/logo-192.png">
+    <meta name="theme-color" content="#2d4a2b">
     <title>Gerenciamento de Colheita</title>
-
     <link rel="stylesheet" href="style.css">
-    <script type="module" src="colheita.js?v=1.5"></script>
-    <script type="module" src="menu.js?v=1.5"></script> 
+    <script type="module" src="colheita.js?v=1.6"></script>
+    <script type="module" src="menu.js?v=1.5"></script>
 </head>
 <body>
     <header>
         <nav>
-            <h1>Painel de Gestão de Colheita</h1>
+            <h1>Painel de Gestão de Café</h1>
             <hr>
             <h2 class="titulo">Gerenciamento de Colheita</h2>
         </nav>
     </header>
-
     <section class="menu">
         <details>
-            <summary>☰ Menu</summary>
+            <summary>
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
+                </svg>
+            </summary>
             <ul>
                 <li><a href="index.html">Painel de Gestão</a></li>
-                <li><a href="producao.html">Produção por Moita</a></li>
-                <li><a href="cadastro.html">Cadastro de Moita</a></li>
+                <li><a href="moitas.html">Gerenciamento de Moitas</a></li>
                 <li><a href="despesas.html">Gerenciamento de Despesas</a></li>
                 <li><a href="companheiros.html">Gerenciamento de Companheiros</a></li>
                 <li><a href="vendas.html">Gerenciamento de Vendas</a></li>
@@ -37,27 +38,42 @@
         </details>
     </section>
 
-    <section>
-        <h3>Gerenciamento de Colheita</h3>
-        <form id="gerenciamento-colheita-form">
-            <label for="moita-colheita">Moita:</label>
-            <select id="moita-colheita" name="moita-colheita">
-                <option value="">Sem moita específica</option>
-            </select><br><br>
+    <main>
+        <section>
+            <div class="acoes-principais">
+                <button class="btn-acao" onclick="abrirModal('modal-colheita')">🌾 Registrar Colheita</button>
+                <button class="btn-acao marrom" onclick="abrirModal('modal-ver-colheitas')">📋 Ver Colheitas Registradas</button>
+            </div>
+        </section>
+    </main>
 
-            <label for="data-colheita">Data da Colheita:</label>
-            <input type="date" id="data-colheita" name="data-colheita" required><br><br>
+    <!-- MODAL: REGISTRAR COLHEITA -->
+    <div class="modal-overlay" id="modal-colheita">
+        <div class="modal-box">
+            <button class="modal-fechar" onclick="fecharModal('modal-colheita')">✕</button>
+            <h3>🌾 Registrar Colheita</h3>
+            <form id="gerenciamento-colheita-form">
+                <label for="moita-colheita">Moita:</label>
+                <select id="moita-colheita" name="moita-colheita">
+                    <option value="">Sem moita específica</option>
+                </select><br><br>
+                <label for="data-colheita">Data da Colheita:</label>
+                <input type="date" id="data-colheita" name="data-colheita" required><br><br>
+                <label for="quantidade-colhida">Quantidade Colhida (kg):</label>
+                <input type="number" id="quantidade-colhida" name="quantidade-colhida" step="0.01" required><br><br>
+                <button type="submit">Registrar Colheita</button>
+            </form>
+        </div>
+    </div>
 
-            <label for="quantidade-colhida">Quantidade Colhida (kg):</label>
-            <input type="number" id="quantidade-colhida" name="quantidade-colhida" step="0.01" required><br><br>
-
-            <button type="submit">Registrar Colheita</button>
-        </form>
-    </section>
-
-    <section>
-        <h3>Colheitas Registradas</h3>
-        <div id="lista-colheitas"></div>
-    </section>
+    <!-- MODAL: VER COLHEITAS REGISTRADAS -->
+    <div class="modal-overlay" id="modal-ver-colheitas">
+        <div class="modal-box">
+            <button class="modal-fechar" onclick="fecharModal('modal-ver-colheitas')">✕</button>
+            <h3>📋 Colheitas Registradas</h3>
+            <input type="text" id="pesquisa-colheita" class="campo-busca" placeholder="Pesquisar por moita" oninput="filtrarColheitas()">
+            <div id="lista-colheitas"></div>
+        </div>
+    </div>
 </body>
 </html>

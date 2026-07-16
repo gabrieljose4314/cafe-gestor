@@ -4,13 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="manifest" href="./manifest.json">
-<link rel="icon" type="image/png" href="./img/logo-192.png">
-<link rel="apple-touch-icon" href="./img/logo-192.png">
-<meta name="theme-color" content="#2d4a2b">
+  <link rel="icon" type="image/png" href="./img/logo-192.png">
+  <link rel="apple-touch-icon" href="./img/logo-192.png">
+  <meta name="theme-color" content="#2d4a2b">
   <title>Histórico Geral</title>
-
   <link rel="stylesheet" href="style.css">
-  <script type="module" src="historico.js?v=1.5"></script>
+  <script type="module" src="historico.js?v=1.6"></script>
 </head>
 <body>
   <header>
@@ -20,14 +19,16 @@
       <h2 class="titulo">Histórico Geral</h2>
     </nav>
   </header>
-
   <section class="menu">
     <details>
-      <summary>☰ Menu</summary>
+      <summary>
+        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" viewBox="0 0 16 16">
+          <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
+        </svg>
+      </summary>
       <ul>
         <li><a href="index.html">Painel de Gestão</a></li>
-        <li><a href="producao.html">Produção por Moita</a></li>
-        <li><a href="cadastro.html">Cadastro de Moita</a></li>
+        <li><a href="moitas.html">Gerenciamento de Moitas</a></li>
         <li><a href="despesas.html">Gerenciamento de Despesas</a></li>
         <li><a href="companheiros.html">Gerenciamento de Companheiros</a></li>
         <li><a href="colheita.html">Gerenciamento de Colheita</a></li>
@@ -35,49 +36,47 @@
       </ul>
     </details>
   </section>
-
   <main>
     <section>
       <h3>Filtros do Histórico</h3>
-
-      <label for="pesquisa-historico">Pesquisar:</label>
-      <input type="text" id="pesquisa-historico" placeholder="Digite descrição, moita, categoria, tipo...">
-      <br><br>
-
-      <label for="filtro-ano">Ano:</label>
-      <select id="filtro-ano">
-        <option value="">Todos</option>
-      </select>
-      <br><br>
-
-      <label for="filtro-mes">Mês:</label>
-      <select id="filtro-mes">
-        <option value="">Todos</option>
-        <option value="01">Janeiro</option>
-        <option value="02">Fevereiro</option>
-        <option value="03">Março</option>
-        <option value="04">Abril</option>
-        <option value="05">Maio</option>
-        <option value="06">Junho</option>
-        <option value="07">Julho</option>
-        <option value="08">Agosto</option>
-        <option value="09">Setembro</option>
-        <option value="10">Outubro</option>
-        <option value="11">Novembro</option>
-        <option value="12">Dezembro</option>
-      </select>
-      <br><br>
-
-      <label for="filtro-tipo">Categoria / Tipo:</label>
-      <select id="filtro-tipo">
-        <option value="">Todos</option>
-        <option value="Despesa">Despesa</option>
-        <option value="Venda">Venda</option>
-        <option value="Colheita">Colheita</option>
-        <option value="Trabalho">Trabalho</option>
-      </select>
+      <input type="text" id="pesquisa-historico" class="campo-busca" placeholder="Pesquisar descrição, moita, categoria, tipo...">
+      <div class="filtros-historico">
+        <div class="filtro-item">
+          <label for="filtro-ano">Ano</label>
+          <select id="filtro-ano">
+            <option value="">Todos</option>
+          </select>
+        </div>
+        <div class="filtro-item">
+          <label for="filtro-mes">Mês</label>
+          <select id="filtro-mes">
+            <option value="">Todos</option>
+            <option value="01">Janeiro</option>
+            <option value="02">Fevereiro</option>
+            <option value="03">Março</option>
+            <option value="04">Abril</option>
+            <option value="05">Maio</option>
+            <option value="06">Junho</option>
+            <option value="07">Julho</option>
+            <option value="08">Agosto</option>
+            <option value="09">Setembro</option>
+            <option value="10">Outubro</option>
+            <option value="11">Novembro</option>
+            <option value="12">Dezembro</option>
+          </select>
+        </div>
+        <div class="filtro-item">
+          <label for="filtro-tipo">Categoria / Tipo</label>
+          <select id="filtro-tipo">
+            <option value="">Todos</option>
+            <option value="Despesa">Despesa</option>
+            <option value="Venda">Venda</option>
+            <option value="Colheita">Colheita</option>
+            <option value="Trabalho">Trabalho</option>
+          </select>
+        </div>
+      </div>
     </section>
-
     <section>
       <h3>Movimentações</h3>
       <div id="lista-historico"></div>

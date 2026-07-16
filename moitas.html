@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" type="image/png" href="./img/logo-192.png">
+    <link rel="apple-touch-icon" href="./img/logo-192.png">
+    <meta name="theme-color" content="#2d4a2b">
+    <title>Gerenciamento de Moitas</title>
+    <link rel="stylesheet" href="style.css">
+    <script type="module" src="moitas.js?v=1.0"></script>
+    <script type="module" src="menu.js?v=1.5"></script>
+</head>
+<body>
+    <header>
+        <nav>
+            <h1>Painel de Gestão de Café</h1>
+            <hr>
+            <h2 class="titulo">Gerenciamento de Moitas</h2>
+        </nav>
+    </header>
+    <section class="menu">
+        <details>
+            <summary>
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
+                </svg>
+            </summary>
+            <ul>
+                <li><a href="index.html">Painel de Gestão</a></li>
+                <li><a href="despesas.html">Gerenciamento de Despesas</a></li>
+                <li><a href="companheiros.html">Gerenciamento de Companheiros</a></li>
+                <li><a href="colheita.html">Gerenciamento de Colheita</a></li>
+                <li><a href="vendas.html">Gerenciamento de Vendas</a></li>
+                <li><a href="historico.html">Histórico de Movimentações</a></li>
+            </ul>
+        </details>
+    </section>
+
+    <main>
+        <section>
+            <div class="acoes-principais">
+                <button class="btn-acao" onclick="abrirModal('modal-moita')">🌱 Cadastrar Moita</button>
+                <button class="btn-acao marrom" onclick="abrirModal('modal-ver-moitas')">🌿 Ver Moitas Cadastradas</button>
+                <button class="btn-acao teal" onclick="abrirModalRelatorio()">📊 Relatório de Produção</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- MODAL: CADASTRAR / EDITAR MOITA -->
+    <div class="modal-overlay" id="modal-moita">
+        <div class="modal-box">
+            <button class="modal-fechar" onclick="fecharModalMoita()">✕</button>
+            <h3 id="titulo-modal-moita">🌱 Cadastrar Moita</h3>
+            <form id="cadastro-moita-form">
+                <label for="nome-moita">Nome da Moita:</label>
+                <input type="text" id="nome-moita" name="nome-moita" required><br><br>
+                <label for="area-moita">Área (hectares):</label>
+                <input type="number" id="area-moita" name="area-moita" step="0.01" required><br><br>
+                <label for="quantidade-de-pes">Quantidade de Pés:</label>
+                <input type="number" id="quantidade-de-pes" name="quantidade-de-pes" required><br><br>
+                <label for="tipo-de-cafe">Tipo de Café:</label>
+                <input type="text" id="tipo-de-cafe" name="tipo-de-cafe"><br><br>
+                <button type="submit" id="btn-salvar-moita">Cadastrar Moita</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: VER MOITAS CADASTRADAS -->
+    <div class="modal-overlay" id="modal-ver-moitas">
+        <div class="modal-box">
+            <button class="modal-fechar" onclick="fecharModal('modal-ver-moitas')">✕</button>
+            <h3>🌿 Moitas Cadastradas</h3>
+            <input type="text" id="pesquisa-moita" class="campo-busca" placeholder="Pesquisar moita" oninput="filtrarMoitas()">
+            <div id="lista-moitas"></div>
+        </div>
+    </div>
+
+    <!-- MODAL: RELATÓRIO DE PRODUÇÃO -->
+    <div class="modal-overlay" id="modal-relatorio">
+        <div class="modal-box">
+            <button class="modal-fechar" onclick="fecharModal('modal-relatorio')">✕</button>
+            <h3>📊 Relatório de Produção e Financeiro</h3>
+            <input type="text" id="pesquisa-relatorio" class="campo-busca" placeholder="Pesquisar moita" oninput="filtrarRelatorio()">
+            <div id="lista-producao"></div>
+        </div>
+    </div>
+</body>
+</html>

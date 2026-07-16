@@ -8,9 +8,8 @@
   <link rel="apple-touch-icon" href="./img/logo-192.png">
   <meta name="theme-color" content="#2d4a2b">
   <title>Companheiros</title>
-
   <link rel="stylesheet" href="style.css" />
-  <script type="module" src="companheiros.js?v=1.6"></script>
+  <script type="module" src="companheiros.js?v=3.1"></script>
 </head>
 <body>
   <header>
@@ -20,18 +19,16 @@
       <h2 class="titulo">Companheiros</h2>
     </nav>
   </header>
-
   <section class="menu">
     <details>
       <summary>
-        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" viewBox="0 0 16 16">
           <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
         </svg>
       </summary>
       <ul>
         <li><a href="index.html">Painel de Gestão</a></li>
-        <li><a href="producao.html">Produção por Moita</a></li>
-        <li><a href="cadastro.html">Cadastro de Moita</a></li>
+        <li><a href="moitas.html">Gerenciamento de Moitas</a></li>
         <li><a href="despesas.html">Gerenciamento de Despesas</a></li>
         <li><a href="colheita.html">Gerenciamento de Colheita</a></li>
         <li><a href="vendas.html">Gerenciamento de Vendas</a></li>
@@ -39,212 +36,172 @@
       </ul>
     </details>
   </section>
-
   <main>
-
-    <!-- ── CADASTRO DE COMPANHEIRO ── -->
     <section>
-      <h3>Cadastro de Companheiro</h3>
+      <div class="acoes-principais">
+        <button class="btn-acao" onclick="abrirModal('modal-cadastro')">👤 Cadastrar Companheiro</button>
+        <button class="btn-acao" onclick="abrirModal('modal-turma')">👥 Criar Turma</button>
+        <button class="btn-acao" onclick="abrirModal('modal-trabalho')">📝 Registrar Trabalho</button>
+        <button class="btn-acao marrom" onclick="abrirModal('modal-ver')">📋 Ver Companheiros / Turmas</button>
+        <button class="btn-acao teal" onclick="abrirModal('modal-pagamentos')">💰 Monitoramento de Pagamentos</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL: CADASTRAR COMPANHEIRO -->
+  <div class="modal-overlay" id="modal-cadastro">
+    <div class="modal-box">
+      <button class="modal-fechar" onclick="fecharModal('modal-cadastro')">✕</button>
+      <h3>👤 Cadastrar Companheiro</h3>
       <form id="cadastro-companheiro-form">
         <label for="nome-companheiro">Nome:</label>
-        <input type="text" id="nome-companheiro" required />
-        <br><br>
-
+        <input type="text" id="nome-companheiro" required /><br><br>
         <label for="pix-companheiro">Chave Pix:</label>
-        <input type="text" id="pix-companheiro" placeholder="CPF, e-mail, telefone ou chave aleatória" />
-        <br><br>
-
-        <button type="submit">Cadastrar Companheiro</button>
+        <input type="text" id="pix-companheiro" placeholder="CPF, e-mail, telefone ou chave aleatória" /><br><br>
+        <button type="submit">Cadastrar</button>
       </form>
-    </section>
+    </div>
+  </div>
 
-    <!-- ── COMPANHEIROS CADASTRADOS ── -->
-    <section>
-      <details id="details-companheiros">
-        <summary>
-          <h3 style="display:inline">Companheiros Cadastrados</h3>
-          <span id="hint-companheiros" style="font-size:0.8rem;color:#888;font-weight:normal;"> — clique para ver</span>
-        </summary>
-        <div id="lista-companheiros" style="margin-top:1rem;"><p>Nenhum companheiro cadastrado.</p></div>
-      </details>
-    </section>
-
-    <!-- ── CRIAR TURMA ── -->
-    <section>
-      <h3>Criar Turma</h3>
+  <!-- MODAL: CRIAR TURMA -->
+  <div class="modal-overlay" id="modal-turma">
+    <div class="modal-box">
+      <button class="modal-fechar" onclick="fecharModal('modal-turma')">✕</button>
+      <h3>👥 Criar Turma</h3>
       <form id="criar-turma-form">
         <label for="nome-turma">Nome da turma:</label>
-        <input type="text" id="nome-turma" placeholder="Ex: Turma de Colheita A" required />
-        <br><br>
-
+        <input type="text" id="nome-turma" placeholder="Ex: Turma de Colheita A" required /><br><br>
         <label>Selecionar companheiros:</label>
-        <div id="checkboxes-turma" style="
-          background-color: #fcfaf7;
-          border: 1px solid #cdbda7;
-          border-radius: 8px;
-          padding: 0.7rem;
-          margin-bottom: 0.8rem;
-          max-height: 180px;
-          overflow-y: auto;
-        "></div>
-
+        <div class="checkbox-container" id="checkboxes-turma"></div>
         <button type="submit">Criar Turma</button>
       </form>
-    </section>
+    </div>
+  </div>
 
-    <!-- ── TURMAS CADASTRADAS ── -->
-    <section>
-      <details id="details-turmas">
-        <summary>
-          <h3 style="display:inline">Turmas Cadastradas</h3>
-          <span id="hint-turmas" style="font-size:0.8rem;color:#888;font-weight:normal;"> — clique para ver</span>
-        </summary>
-        <div id="lista-turmas" style="margin-top:1rem;"><p>Nenhuma turma cadastrada.</p></div>
-      </details>
-    </section>
-
-    <!-- ── REGISTRAR TRABALHO ── -->
-    <section>
-      <h3>Registrar Trabalho</h3>
+  <!-- MODAL: REGISTRAR TRABALHO -->
+  <div class="modal-overlay" id="modal-trabalho">
+    <div class="modal-box">
+      <button class="modal-fechar" onclick="fecharModal('modal-trabalho')">✕</button>
+      <h3>📝 Registrar Trabalho</h3>
       <form id="registro-trabalho-form">
-
         <label>Companheiros:</label><br>
-        <button type="button" id="btn-abrir-modal">Selecionar Companheiros / Turma</button>
-        <div id="resumo-selecionados" style="margin-top:8px;font-size:0.9rem;color:#4a3728;">Nenhum selecionado.</div>
-        <br>
-
+        <button type="button" id="btn-abrir-selecao">Selecionar Companheiros / Turma</button>
+        <div class="resumo-selecionados" id="resumo-selecionados">Nenhum selecionado.</div>
         <label for="moita-trabalho">Moita:</label>
-        <select id="moita-trabalho">
-          <option value="">Sem moita específica</option>
-        </select>
-        <br><br>
-
+        <select id="moita-trabalho"><option value="">Sem moita específica</option></select><br><br>
         <label for="data-trabalho">Data:</label>
-        <input type="date" id="data-trabalho" required />
-        <br><br>
-
+        <input type="date" id="data-trabalho" oninput="verificarFormulario()"><br><br>
         <label for="servico-trabalho">Serviço realizado:</label>
-        <input type="text" id="servico-trabalho" placeholder="Ex: colheita, capina, adubação" required />
-        <br><br>
-
+        <input type="text" id="servico-trabalho" placeholder="Ex: colheita, capina, adubação" oninput="verificarFormulario()"><br><br>
         <label for="tipo-pagamento">Tipo de pagamento:</label>
-        <select id="tipo-pagamento">
+        <select id="tipo-pagamento" onchange="alternarTipo()">
           <option value="diaria">Diária</option>
           <option value="producao">Produção</option>
-        </select>
-        <br><br>
-
-        <!-- Diária -->
+        </select><br><br>
         <div id="campos-diaria">
           <label for="valor-trabalho">Valor (R$):</label>
-          <input type="number" id="valor-trabalho" step="0.01" />
-          <br><br>
+          <input type="number" id="valor-trabalho" step="0.01" oninput="verificarFormulario()"><br><br>
+          <label for="status-pagamento">Status:</label>
+          <select id="status-pagamento">
+            <option value="pendente">Pendente</option>
+            <option value="pago">Pago</option>
+          </select><br><br>
         </div>
-
-        <!-- Produção -->
-        <div id="campos-producao" style="display:none;">
-          <label for="quantidade-producao">Quantidade:</label>
-          <input type="number" id="quantidade-producao" step="0.01" />
-          <br><br>
-
-          <label for="preco-producao">Preço por produção (R$):</label>
-          <input type="number" id="preco-producao" step="0.01" />
-          <br><br>
-
-          <div id="preview-producao" style="
-            background-color: #f8f3eb;
-            border: 1px solid #dfd1bc;
-            border-radius: 8px;
-            padding: 0.7rem;
-            font-size: 0.9rem;
-            color: #4a3728;
-            margin-bottom: 0.8rem;
-            display: none;
-          "></div>
-        </div>
-
-        <label for="status-pagamento">Status do pagamento:</label>
-        <select id="status-pagamento">
-          <option value="pendente">Pendente</option>
-          <option value="pago">Pago</option>
-        </select>
-        <br><br>
-
-        <button type="submit">Registrar Trabalho</button>
+        <div id="msg-validacao" class="msg-validacao"></div>
+        <button type="submit" id="btn-registrar">Registrar Trabalho</button>
+        <button type="button" id="btn-prosseguir" onclick="abrirEtapaProducao()">Prosseguir →</button>
       </form>
-    </section>
+    </div>
+  </div>
 
-    <!-- ── MONITORAMENTO DE PAGAMENTOS ── -->
-    <section>
-      <h3>Monitoramento de Pagamentos</h3>
+  <!-- MODAL: ETAPA PRODUÇÃO -->
+  <div class="modal-overlay" id="modal-producao">
+    <div class="modal-box">
+      <button class="modal-fechar" onclick="fecharModal('modal-producao')">✕</button>
+      <h3>📦 Detalhes da Produção</h3>
+      <label>Valor da produção (R$):</label>
+      <input type="number" id="valor-producao" step="0.01" placeholder="Ex: 10,00 por saco" oninput="calcularProducao()"><br><br>
+      <div id="lista-producao-companheiros"></div>
+      <div id="total-producao-box">
+        <strong>Total geral: <span id="total-producao-geral">R$ 0,00</span></strong>
+      </div>
+      <label>Status:</label>
+      <select id="status-producao">
+        <option value="pendente">Pendente</option>
+        <option value="pago">Pago</option>
+      </select>
+      <button onclick="registrarProducao()">Registrar Trabalho</button>
+    </div>
+  </div>
 
-      <label for="pesquisa-companheiro">Pesquisar por nome:</label>
-      <input type="text" id="pesquisa-companheiro" placeholder="Digite o nome do companheiro" />
-      <br><br>
+  <!-- MODAL: VER COMPANHEIROS/TURMAS -->
+  <div class="modal-overlay" id="modal-ver">
+    <div class="modal-box">
+      <button class="modal-fechar" onclick="fecharModal('modal-ver')">✕</button>
+      <h3>📋 Companheiros / Turmas</h3>
+      <div class="abas">
+        <button class="aba-btn ativa"   onclick="trocarAbaVer('companheiros')">Companheiros</button>
+        <button class="aba-btn inativa" onclick="trocarAbaVer('turmas')">Turmas</button>
+      </div>
+      <div id="painel-ver-companheiros">
+        <div id="lista-companheiros"><p>Nenhum companheiro cadastrado.</p></div>
+      </div>
+      <div id="painel-ver-turmas">
+        <div id="lista-turmas"><p>Nenhuma turma cadastrada.</p></div>
+      </div>
+    </div>
+  </div>
 
+  <!-- MODAL: MONITORAMENTO -->
+  <div class="modal-overlay" id="modal-pagamentos">
+    <div class="modal-box">
+      <button class="modal-fechar" onclick="fecharModal('modal-pagamentos')">✕</button>
+      <h3>💰 Monitoramento de Pagamentos</h3>
       <div id="resumo-pagamentos">
         <p><strong>Total pendente:</strong> <span id="total-pendente">R$ 0,00</span></p>
         <p><strong>Total pago:</strong> <span id="total-pago">R$ 0,00</span></p>
       </div>
-
-      <h4>Pendentes de Pagamento</h4>
-      <div id="lista-pendentes"></div>
-
-      <h4>Pagamentos Realizados</h4>
-      <div id="lista-pagos"></div>
-    </section>
-
-  </main>
-
-  <!-- ── MODAL SELEÇÃO ── -->
-  <div id="modal-companheiros" style="
-    display:none; position:fixed; inset:0;
-    background:rgba(0,0,0,0.5); z-index:1000;
-    align-items:center; justify-content:center;
-  ">
-    <div style="
-      background:#fff; border-radius:12px; padding:1.5rem;
-      width:90%; max-width:420px;
-      box-shadow:0 8px 32px rgba(0,0,0,0.2);
-      max-height:80vh; overflow-y:auto;
-    ">
-      <h3 style="color:#2d4a2b;margin-bottom:1rem;">Selecionar Companheiros / Turma</h3>
-
-      <!-- Turma em cima, Avulso embaixo -->
-      <div style="display:flex;gap:8px;margin-bottom:1rem;">
-        <button type="button" id="aba-turma" onclick="trocarAba('turma')" style="flex:1;background:#2d4a2b;color:#fff;">Por Turma</button>
-        <button type="button" id="aba-avulso" onclick="trocarAba('avulso')" style="flex:1;background:#e7dfd1;color:#2d4a2b;">Avulsos</button>
+      <div>
+        <button class="btn-acao" onclick="abrirModal('modal-pendentes')">⏳ Pendentes</button>
+        <button class="btn-acao teal" onclick="abrirModal('modal-pagos')">✅ Realizados</button>
       </div>
-
-      <!-- Painel turma -->
-      <div id="painel-turma">
-        <label style="font-weight:bold;color:#4a3728;display:block;margin-bottom:0.4rem;">Turma:</label>
-        <select id="select-turma" style="width:100%;padding:0.6rem;border:1px solid #cdbda7;border-radius:8px;margin-bottom:0.8rem;font-size:1rem;background:#fcfaf7;">
-          <option value="">Selecione uma turma</option>
-        </select>
-        <div id="presenca-container" style="display:none;">
-          <label style="font-weight:bold;color:#4a3728;display:block;margin-bottom:0.4rem;">Marcar presença:</label>
-          <div id="lista-presenca" style="
-            background-color:#fcfaf7; border:1px solid #cdbda7;
-            border-radius:8px; padding:0.7rem;
-            max-height:200px; overflow-y:auto;
-          "></div>
-          <div id="resumo-presentes" style="font-size:0.85rem;color:#4a3728;margin-top:6px;"></div>
-        </div>
-      </div>
-
-      <!-- Painel avulso -->
-      <div id="painel-avulso" style="display:none;">
-        <div id="companheiros-checkboxes" style="
-          background-color:#fcfaf7; border:1px solid #cdbda7;
-          border-radius:8px; padding:0.7rem;
-          max-height:260px; overflow-y:auto;
-        "></div>
-      </div>
-
-      <button type="button" id="btn-confirmar-companheiros" style="width:100%;margin-top:12px;">Confirmar</button>
     </div>
   </div>
 
+  <!-- MODAL: PENDENTES -->
+  <div class="modal-overlay" id="modal-pendentes">
+    <div class="modal-box">
+      <button class="modal-fechar" onclick="fecharModal('modal-pendentes')">✕</button>
+      <h3>⏳ Pendentes de Pagamento</h3>
+      <input type="text" id="pesquisa-pendentes" class="campo-busca" placeholder="Pesquisar por nome" oninput="renderizarTrabalhos()"><br><br>
+      <div id="lista-pendentes"><p>Nenhum pagamento pendente.</p></div>
+    </div>
+  </div>
+
+  <!-- MODAL: PAGOS -->
+  <div class="modal-overlay" id="modal-pagos">
+    <div class="modal-box">
+      <button class="modal-fechar" onclick="fecharModal('modal-pagos')">✕</button>
+      <h3>✅ Pagamentos Realizados</h3>
+      <input type="text" id="pesquisa-pagos" class="campo-busca" placeholder="Pesquisar por nome" oninput="renderizarTrabalhos()"><br><br>
+      <div id="lista-pagos"><p>Nenhum pagamento realizado.</p></div>
+    </div>
+  </div>
+
+  <!-- MODAL: SELECIONAR COMPANHEIROS -->
+  <div class="modal-overlay" id="modal-selecao">
+    <div class="modal-box">
+      <button class="modal-fechar" onclick="fecharModal('modal-selecao');atualizarResumo()">✕</button>
+      <h3>Selecionar Companheiros</h3>
+      <label class="label-filtro-turma">Filtrar por turma:</label>
+      <select id="select-turma" class="select-turma" onchange="filtrarPorTurma()">
+        <option value="">Nenhuma (mostrar todos)</option>
+      </select>
+          <input type="text" id="pesquisa-selecao" class="campo-busca" placeholder="Pesquisar companheiro" oninput="filtrarPorNome()">
+      <div class="checkbox-container" id="companheiros-checkboxes"></div>
+      <div id="resumo-presentes" class="resumo-presentes"></div>
+      <button class="btn-confirmar-selecao" onclick="confirmarSelecao()">Confirmar</button>
+    </div>
+  </div>
 </body>
 </html>

@@ -1,442 +1,197 @@
 import { db } from "./firebase.js";
 import { exigirUsuarioAprovado } from "./acesso.js";
-
 import {
-  collection,
-  addDoc,
-  getDocs,
-  doc,
-  updateDoc,
-  deleteDoc
+  collection, addDoc, getDocs,
+  doc, updateDoc, deleteDoc
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
-// ── Elementos ─────────────────────────────────────────────────────────────────
-const formCompanheiro  = document.getElementById("cadastro-companheiro-form");
-const formTurma        = document.getElementById("criar-turma-form");
-const formTrabalho     = document.getElementById("registro-trabalho-form");
-const selectMoita      = document.getElementById("moita-trabalho");
-const selectTurma      = document.getElementById("select-turma");
-const listaCompanheiros = document.getElementById("lista-companheiros");
-const listaTurmas      = document.getElementById("lista-turmas");
-const listaPendentes   = document.getElementById("lista-pendentes");
-const listaPagos       = document.getElementById("lista-pagos");
-const totalPendenteEl  = document.getElementById("total-pendente");
-const totalPagoEl      = document.getElementById("total-pago");
-const inputPesquisa    = document.getElementById("pesquisa-companheiro");
-const modal            = document.getElementById("modal-companheiros");
-const btnAbrirModal    = document.getElementById("btn-abrir-modal");
-const btnConfirmar     = document.getElementById("btn-confirmar-companheiros");
-const resumoSelecionados = document.getElementById("resumo-selecionados");
-
-let usuarioAtual          = null;
-let todosOsCompanheiros   = [];
-let todasAsTurmas         = [];
-let todosOsTrabalhos      = [];
+let usuarioAtual        = null;
+let todosOsCompanheiros = [];
+let todasAsTurmas       = [];
+let todosOsTrabalhos    = [];
 
 // ── Utilitários ───────────────────────────────────────────────────────────────
-function formatarMoeda(valor) {
-  return Number(valor || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
-
-function obterDataHoje() {
-  const hoje = new Date();
-  return `${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,"0")}-${String(hoje.getDate()).padStart(2,"0")}`;
-}
-
-function formatarDataBR(data) {
-  if (!data) return "-";
-  const p = data.split("-");
-  return p.length !== 3 ? data : `${p[2]}/${p[1]}/${p[0]}`;
-}
+const fmt = v => Number(v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+const hoje = () => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; };
+const fmtBR = d => { if(!d) return "-"; const p=d.split("-"); return p.length!==3?d:`${p[2]}/${p[1]}/${p[0]}`; };
 
 // ── Modal ─────────────────────────────────────────────────────────────────────
-btnAbrirModal.addEventListener("click", () => { modal.style.display = "flex"; });
-
-btnConfirmar.addEventListener("click", () => {
-  modal.style.display = "none";
-  atualizarResumoSelecionados();
+window.abrirModal  = id => document.getElementById(id).classList.add("aberto");
+window.fecharModal = id => document.getElementById(id).classList.remove("aberto");
+document.querySelectorAll(".modal-overlay").forEach(m => {
+  m.addEventListener("click", e => {
+    if (e.target === m) {
+      m.classList.remove("aberto");
+      if (m.id === "modal-selecao") atualizarResumo();
+    }
+  });
 });
 
-modal.addEventListener("click", (e) => {
-  if (e.target === modal) {
-    modal.style.display = "none";
-    atualizarResumoSelecionados();
-  }
-});
-
-selectTurma.addEventListener("change", carregarPresenca);
-
-// ── Trocar aba no modal ───────────────────────────────────────────────────────
-window.trocarAba = function(aba) {
-  const isTurma = aba === "turma";
-  document.getElementById("painel-turma").style.display  = isTurma ? "block" : "none";
-  document.getElementById("painel-avulso").style.display = isTurma ? "none"  : "block";
-  document.getElementById("aba-turma").style.background  = isTurma ? "#2d4a2b" : "#e7dfd1";
-  document.getElementById("aba-turma").style.color       = isTurma ? "#fff"    : "#2d4a2b";
-  document.getElementById("aba-avulso").style.background = isTurma ? "#e7dfd1" : "#2d4a2b";
-  document.getElementById("aba-avulso").style.color      = isTurma ? "#2d4a2b" : "#fff";
+// ── Abas ver ──────────────────────────────────────────────────────────────────
+window.trocarAbaVer = function(aba) {
+  const isComp = aba === "companheiros";
+  document.getElementById("painel-ver-companheiros").style.display = isComp ? "block" : "none";
+  document.getElementById("painel-ver-turmas").style.display       = isComp ? "none"  : "block";
+  document.querySelectorAll("#modal-ver .aba-btn").forEach((btn,i) => {
+    btn.className = "aba-btn " + ((isComp?i===0:i===1) ? "ativa" : "inativa");
+  });
 };
 
-function atualizarResumoSelecionados() {
-  const avulsos  = [...document.querySelectorAll(".cb-avulso:checked")];
-  const presentes = [...document.querySelectorAll(".cb-presenca:checked")];
-  const todos    = avulsos.length > 0 ? avulsos : presentes;
-  resumoSelecionados.textContent = todos.length === 0
-    ? "Nenhum selecionado."
-    : `✅ ${todos.length} selecionado(s): ${todos.map(cb => cb.getAttribute("data-nome")).join(", ")}`;
-}
-
 // ── Tipo de pagamento ─────────────────────────────────────────────────────────
-document.getElementById("tipo-pagamento").addEventListener("change", function() {
-  const tipo = this.value;
-  document.getElementById("campos-diaria").style.display   = tipo === "diaria"   ? "block" : "none";
-  document.getElementById("campos-producao").style.display = tipo === "producao" ? "block" : "none";
-});
+window.alternarTipo = function() {
+  const tipo = document.getElementById("tipo-pagamento").value;
+  document.getElementById("campos-diaria").style.display    = tipo === "diaria"   ? "block" : "none";
+  document.getElementById("btn-registrar").style.display    = tipo === "diaria"   ? "inline-block" : "none";
+  document.getElementById("btn-prosseguir").style.display   = tipo === "producao" ? "inline-block" : "none";
+  verificarFormulario();
+};
 
-document.getElementById("quantidade-producao").addEventListener("input", atualizarPreviewProducao);
-document.getElementById("preco-producao").addEventListener("input", atualizarPreviewProducao);
+// ── Verificar formulário ──────────────────────────────────────────────────────
+window.verificarFormulario = function() {
+  const tipo       = document.getElementById("tipo-pagamento").value;
+  const data       = document.getElementById("data-trabalho").value;
+  const servico    = document.getElementById("servico-trabalho").value.trim();
+  const selecionados = [...document.querySelectorAll(".cb-avulso:checked")];
+  const valor      = parseFloat(document.getElementById("valor-trabalho").value);
+  let completo = data && servico && selecionados.length > 0;
+  if (tipo === "diaria") completo = completo && valor > 0;
+  const btnId = tipo === "diaria" ? "btn-registrar" : "btn-prosseguir";
+  const btn = document.getElementById(btnId);
+  btn.classList.toggle("habilitado", completo);
+  btn.classList.toggle("desabilitado", !completo);
+};
 
-function atualizarPreviewProducao() {
-  const qtd   = parseFloat(document.getElementById("quantidade-producao").value) || 0;
-  const preco = parseFloat(document.getElementById("preco-producao").value) || 0;
-  const preview = document.getElementById("preview-producao");
-  if (qtd > 0 && preco > 0) {
-    preview.style.display = "block";
-    preview.innerHTML = `<strong>Total a receber:</strong> ${formatarMoeda(qtd * preco)}`;
-  } else {
-    preview.style.display = "none";
+// ── Filtrar por turma ─────────────────────────────────────────────────────────
+window.filtrarPorTurma = function() {
+  const turmaId = document.getElementById("select-turma").value;
+  document.querySelectorAll(".cb-avulso").forEach(cb => cb.checked = false);
+  if (turmaId) {
+    const turma = todasAsTurmas.find(t => t.id === turmaId);
+    if (turma) turma.membros.forEach(m => {
+      const cb = document.querySelector(`.cb-avulso[value="${m.id}"]`);
+      if (cb) cb.checked = true;
+    });
   }
+  atualizarResumoPresentes();
+};
+function atualizarResumoPresentes() {
+  const marcados = [...document.querySelectorAll(".cb-avulso:checked")];
+  document.getElementById("resumo-presentes").textContent = marcados.length === 0
+    ? "" : `✅ ${marcados.length} selecionado(s): ${marcados.map(cb=>cb.getAttribute("data-nome")).join(", ")}`;
 }
-
-// ── Details hints ─────────────────────────────────────────────────────────────
-document.getElementById("details-companheiros").addEventListener("toggle", function() {
-  document.getElementById("hint-companheiros").textContent = this.open ? " — ocultar" : " — clique para ver";
-});
-document.getElementById("details-turmas").addEventListener("toggle", function() {
-  document.getElementById("hint-turmas").textContent = this.open ? " — ocultar" : " — clique para ver";
-});
-
-// ── Carregamento de dados ─────────────────────────────────────────────────────
-async function carregarCompanheiros(user) {
-  todosOsCompanheiros = [];
-  const snap = await getDocs(collection(db, "usuarios", user.uid, "companheiros"));
-  snap.forEach(d => todosOsCompanheiros.push({ id: d.id, ...d.data() }));
-  renderizarCompanheiros();
-  renderizarCheckboxesTurma();
-  renderizarCheckboxesAvulso();
-}
-
-async function carregarTurmas(user) {
-  todasAsTurmas = [];
-  const snap = await getDocs(collection(db, "usuarios", user.uid, "turmas"));
-  snap.forEach(d => todasAsTurmas.push({ id: d.id, ...d.data() }));
-  renderizarTurmas();
-  atualizarSelectTurmas();
-}
-
-async function carregarMoitas(user) {
-  selectMoita.innerHTML = '<option value="">Sem moita específica</option>';
-  const snap = await getDocs(collection(db, "usuarios", user.uid, "moitas"));
-  snap.forEach(d => {
-    const opt = document.createElement("option");
-    opt.value = d.id; opt.textContent = d.data().nome;
-    selectMoita.appendChild(opt);
+window.filtrarPorNome = function() {
+  const termo = document.getElementById("pesquisa-selecao").value.trim().toLowerCase();
+  document.querySelectorAll("#companheiros-checkboxes .checkbox-item").forEach(label => {
+    const nome = label.querySelector("input").getAttribute("data-nome").toLowerCase();
+    label.style.display = nome.includes(termo) ? "block" : "none";
   });
+};
+window.confirmarSelecao = function() {
+  fecharModal("modal-selecao");
+  atualizarResumo();
+  verificarFormulario();
+};
+function atualizarResumo() {
+  const marcados = [...document.querySelectorAll(".cb-avulso:checked")];
+  document.getElementById("resumo-selecionados").textContent = marcados.length === 0
+    ? "Nenhum selecionado."
+    : `✅ ${marcados.length} selecionado(s): ${marcados.map(cb=>cb.getAttribute("data-nome")).join(", ")}`;
 }
 
-async function buscarTrabalhos(user) {
-  todosOsTrabalhos = [];
-  const snap = await getDocs(collection(db, "usuarios", user.uid, "trabalhosCompanheiros"));
-  snap.forEach(d => todosOsTrabalhos.push({ id: d.id, ...d.data() }));
-  renderizarTrabalhos();
-}
-
-// ── Renderização ──────────────────────────────────────────────────────────────
-function renderizarCompanheiros() {
-  listaCompanheiros.innerHTML = "";
-  if (todosOsCompanheiros.length === 0) {
-    listaCompanheiros.innerHTML = "<p>Nenhum companheiro cadastrado.</p>"; return;
-  }
-  todosOsCompanheiros.forEach(c => {
-    const div = document.createElement("div");
-    div.innerHTML = `
-      <p><strong>Nome:</strong> ${c.nome}</p>
-      <p><strong>Chave Pix:</strong> ${c.pix || "-"}</p>
-      <button data-id="${c.id}" class="btn-excluir-companheiro" style="background:#c1121f;">Excluir</button>
-    `;
-    listaCompanheiros.appendChild(div);
-  });
-  adicionarEventosExcluirCompanheiro();
-}
-
-function renderizarCheckboxesTurma() {
-  const container = document.getElementById("checkboxes-turma");
-  container.innerHTML = todosOsCompanheiros.length === 0
-    ? "<p style='font-size:0.85rem;color:#888;'>Nenhum companheiro cadastrado.</p>"
-    : "";
-  todosOsCompanheiros.forEach(c => {
-    const label = document.createElement("label");
-    label.style.cssText = "display:flex;align-items:center;gap:8px;margin-bottom:8px;cursor:pointer;";
-    label.innerHTML = `<input type="checkbox" class="cb-turma" value="${c.id}" data-nome="${c.nome}"> ${c.nome}`;
-    container.appendChild(label);
-  });
-}
-
-function renderizarCheckboxesAvulso() {
-  const container = document.getElementById("companheiros-checkboxes");
-  container.innerHTML = "";
-  todosOsCompanheiros.forEach(c => {
-    const label = document.createElement("label");
-    label.style.cssText = "display:flex;align-items:center;gap:8px;margin-bottom:8px;cursor:pointer;";
-    label.innerHTML = `<input type="checkbox" class="cb-avulso" value="${c.id}" data-nome="${c.nome}" data-pix="${c.pix || ""}"> ${c.nome}`;
-    container.appendChild(label);
-  });
-}
-
-function renderizarTurmas() {
-  listaTurmas.innerHTML = "";
-  if (todasAsTurmas.length === 0) {
-    listaTurmas.innerHTML = "<p>Nenhuma turma cadastrada.</p>"; return;
-  }
-  todasAsTurmas.forEach(t => {
-    const div = document.createElement("div");
-    div.innerHTML = `
-      <p><strong>${t.nome}</strong> — ${t.membros.length} membro(s)</p>
-      <p style="font-size:0.85rem;color:#666;">${t.membros.map(m => m.nome).join(", ")}</p>
-      <button data-id="${t.id}" class="btn-excluir-turma" style="background:#c1121f;">Excluir turma</button>
-    `;
-    listaTurmas.appendChild(div);
-  });
-  adicionarEventosExcluirTurma();
-}
-
-function atualizarSelectTurmas() {
-  selectTurma.innerHTML = '<option value="">Selecione uma turma</option>';
-  todasAsTurmas.forEach(t => {
-    const opt = document.createElement("option");
-    opt.value = t.id; opt.textContent = t.nome;
-    selectTurma.appendChild(opt);
-  });
-}
-
-function carregarPresenca() {
-  const turmaId = selectTurma.value;
-  const container = document.getElementById("presenca-container");
-  const lista = document.getElementById("lista-presenca");
-
-  if (!turmaId) { container.style.display = "none"; return; }
-
-  const turma = todasAsTurmas.find(t => t.id === turmaId);
+// ── Abrir etapa produção ──────────────────────────────────────────────────────
+window.abrirEtapaProducao = function() {
+  const data       = document.getElementById("data-trabalho").value;
+  const servico    = document.getElementById("servico-trabalho").value.trim();
+  const selecionados = [...document.querySelectorAll(".cb-avulso:checked")];
+  const msgEl      = document.getElementById("msg-validacao");
+  const mostrarErro = msg => {
+    msgEl.textContent = `⚠️ ${msg}`;
+    msgEl.style.display = "block";
+    setTimeout(() => msgEl.style.display = "none", 3000);
+  };
+  if (!data)                 return mostrarErro("Preencha a data.");
+  if (!servico)              return mostrarErro("Preencha o serviço realizado.");
+  if (!selecionados.length)  return mostrarErro("Selecione pelo menos um companheiro.");
+  msgEl.style.display = "none";
+  const lista = document.getElementById("lista-producao-companheiros");
   lista.innerHTML = "";
-  turma.membros.forEach(m => {
-    const label = document.createElement("label");
-    label.style.cssText = "display:flex;align-items:center;gap:8px;margin-bottom:8px;cursor:pointer;";
-    label.innerHTML = `<input type="checkbox" class="cb-presenca" value="${m.id}" data-nome="${m.nome}" checked> ${m.nome}`;
-    lista.appendChild(label);
+  selecionados.forEach(cb => {
+    const div = document.createElement("div");
+    div.className = "producao-item";
+    div.innerHTML = `
+      <div class="producao-item-linha">
+        <strong class="producao-item-nome">${cb.getAttribute("data-nome")}</strong>
+        <input type="number" step="0.01" placeholder="Qtd" data-id="${cb.value}" data-nome="${cb.getAttribute("data-nome")}"
+          class="input-qtd-producao" oninput="calcularProducao()">
+        <span class="valor-individual" data-id="${cb.value}">R$ 0,00</span>
+      </div>`;
+    lista.appendChild(div);
   });
+  document.getElementById("valor-producao").value = "";
+  document.getElementById("total-producao-box").style.display = "none";
+  document.getElementById("total-producao-geral").textContent = "R$ 0,00";
+  fecharModal("modal-trabalho");
+  abrirModal("modal-producao");
+};
 
-  container.style.display = "block";
-  atualizarResumoPresenca();
-  document.querySelectorAll(".cb-presenca").forEach(cb => cb.addEventListener("change", atualizarResumoPresenca));
-}
+// ── Calcular produção ─────────────────────────────────────────────────────────
+window.calcularProducao = function() {
+  const valorUnit = parseFloat(document.getElementById("valor-producao").value) || 0;
+  let totalGeral = 0;
+  document.querySelectorAll(".input-qtd-producao").forEach(input => {
+    const qtd   = parseFloat(input.value) || 0;
+    const total = qtd * valorUnit;
+    totalGeral += total;
+    const span = document.querySelector(`.valor-individual[data-id="${input.getAttribute("data-id")}"]`);
+    if (span) span.textContent = fmt(total);
+  });
+  const box = document.getElementById("total-producao-box");
+  box.style.display = totalGeral > 0 ? "block" : "none";
+  document.getElementById("total-producao-geral").textContent = fmt(totalGeral);
+};
 
-function atualizarResumoPresenca() {
-  const presentes = [...document.querySelectorAll(".cb-presenca:checked")];
-  document.getElementById("resumo-presentes").textContent = presentes.length === 0
-    ? "Nenhum presente."
-    : `✅ ${presentes.length} presente(s): ${presentes.map(cb => cb.getAttribute("data-nome")).join(", ")}`;
-}
-
-// ── Renderizar trabalhos ──────────────────────────────────────────────────────
-function renderizarTrabalhos() {
-  listaPendentes.innerHTML = "";
-  listaPagos.innerHTML = "";
-
-  let totalPendente = 0, totalPago = 0;
-  const pesquisa = inputPesquisa.value.trim().toLowerCase();
-
-  const filtrados = todosOsTrabalhos.filter(t =>
-    (t.companheiroNome || "").toLowerCase().includes(pesquisa)
-  );
-
-  const pendentes = filtrados.filter(t => t.statusPagamento === "pendente")
-    .sort((a,b) => new Date(b.data) - new Date(a.data));
-
-  const pagos = filtrados.filter(t => t.statusPagamento === "pago")
-    .sort((a,b) => new Date(b.dataPagamento||"1900-01-01") - new Date(a.dataPagamento||"1900-01-01"));
-
-  if (pendentes.length === 0) {
-    listaPendentes.innerHTML = "<p>Nenhum pagamento pendente encontrado.</p>";
-  } else {
-    pendentes.forEach(t => {
-      totalPendente += Number(t.valor) || 0;
-      listaPendentes.appendChild(criarCardTrabalho(t));
-    });
+// ── Registrar produção ────────────────────────────────────────────────────────
+window.registrarProducao = async function() {
+  const valorUnit = parseFloat(document.getElementById("valor-producao").value);
+  if (!valorUnit) { alert("Digite o valor da produção."); return; }
+  const inputs = [...document.querySelectorAll(".input-qtd-producao")];
+  if (inputs.some(i => !parseFloat(i.value))) {
+    alert("Preencha a quantidade de todos os companheiros."); return;
   }
-
-  if (pagos.length === 0) {
-    listaPagos.innerHTML = "<p>Nenhum pagamento realizado encontrado.</p>";
-  } else {
-    const details = document.createElement("details");
-    const summary = document.createElement("summary");
-    summary.textContent = `Ver pagamentos realizados (${pagos.length})`;
-    details.appendChild(summary);
-    pagos.forEach(t => {
-      totalPago += Number(t.valor) || 0;
-      details.appendChild(criarCardTrabalho(t));
-    });
-    listaPagos.appendChild(details);
+  const data    = document.getElementById("data-trabalho").value;
+  const servico = document.getElementById("servico-trabalho").value.trim();
+  const status  = document.getElementById("status-producao").value;
+  const moitaId = document.getElementById("moita-trabalho").value;
+  const moitaNome = moitaId ? document.getElementById("moita-trabalho").options[document.getElementById("moita-trabalho").selectedIndex].text : null;
+  const dataPagamento = status === "pago" ? hoje() : null;
+  for (const input of inputs) {
+    const qtd   = parseFloat(input.value);
+    const valor = qtd * valorUnit;
+    const trabalhoBase = {
+      companheiroId: input.getAttribute("data-id"),
+      companheiroNome: input.getAttribute("data-nome"),
+      moitaId: moitaId || null, moitaNome: moitaNome || null,
+      data, servico, valor, tipoPagamento: "producao",
+      statusPagamento: status, dataPagamento,
+      quantidade: qtd, valorUnit,
+      lancadoComoDespesa: false, despesaId: null, criadoEm: new Date()
+    };
+    const ref = await addDoc(collection(db, "usuarios", usuarioAtual.uid, "trabalhosCompanheiros"), trabalhoBase);
+    if (status === "pago") {
+      const despesaId = await lancarDespesa(trabalhoBase, dataPagamento);
+      await updateDoc(doc(db, "usuarios", usuarioAtual.uid, "trabalhosCompanheiros", ref.id), { lancadoComoDespesa: true, despesaId });
+    }
   }
+  alert(`Produção registrada para ${inputs.length} companheiro(s)!`);
+  document.getElementById("registro-trabalho-form").reset();
+  document.querySelectorAll(".cb-avulso").forEach(cb => cb.checked = false);
+  document.getElementById("resumo-selecionados").textContent = "Nenhum selecionado.";
+  document.getElementById("select-turma").value = "";
+  fecharModal("modal-producao");
+  await buscarTrabalhos(usuarioAtual);
+};
 
-  totalPendenteEl.textContent = formatarMoeda(totalPendente);
-  totalPagoEl.textContent     = formatarMoeda(totalPago);
-}
-
-function criarCardTrabalho(trabalho) {
-  const estaPago = trabalho.statusPagamento === "pago";
-  const div = document.createElement("div");
-  div.innerHTML = `
-    <p><strong>Companheiro:</strong> ${trabalho.companheiroNome}</p>
-    <p><strong>Chave Pix:</strong> ${trabalho.companheiroTelefone || "-"}</p>
-    <p><strong>Moita:</strong> ${trabalho.moitaNome || "Sem moita específica"}</p>
-    <p><strong>Data:</strong> ${formatarDataBR(trabalho.data)}</p>
-    <p><strong>Serviço:</strong> ${trabalho.servico}</p>
-    <p><strong>Tipo:</strong> ${trabalho.tipoPagamento === "producao" ? "Produção" : "Diária"}</p>
-    <p><strong>Valor:</strong> ${formatarMoeda(trabalho.valor)}</p>
-    <p><strong>Status:</strong> ${estaPago ? "Pago" : "Pendente"}</p>
-    ${estaPago ? `<p><strong>Data pagamento:</strong> ${formatarDataBR(trabalho.dataPagamento)}</p>` : ""}
-    ${!estaPago
-      ? `<button data-id="${trabalho.id}" class="btn-marcar-pago">Marcar como pago</button>`
-      : `<button data-id="${trabalho.id}" class="btn-voltar-pendente" style="background:#bc6c25;">Voltar para pendente</button>`}
-    <button data-id="${trabalho.id}" class="btn-excluir-trabalho" style="background:#c1121f;">Excluir</button>
-  `;
-  return div;
-}
-
-// ── Eventos dos botões ────────────────────────────────────────────────────────
-function adicionarEventosBotoes() {
-  document.querySelectorAll(".btn-marcar-pago").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const id = btn.getAttribute("data-id");
-      const trabalho = todosOsTrabalhos.find(t => t.id === id);
-      if (!trabalho) return;
-      if (trabalho.lancadoComoDespesa || trabalho.despesaId) {
-        alert("Este pagamento já foi lançado nas despesas."); return;
-      }
-      const dataPagamento = obterDataHoje();
-      const despesaId = await lancarDespesa(trabalho, dataPagamento);
-      await updateDoc(doc(db, "usuarios", usuarioAtual.uid, "trabalhosCompanheiros", id), {
-        statusPagamento: "pago", dataPagamento, lancadoComoDespesa: true, despesaId
-      });
-      alert("Pagamento marcado como pago!");
-      await buscarTrabalhos(usuarioAtual);
-    });
-  });
-
-  document.querySelectorAll(".btn-voltar-pendente").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      if (!confirm("Voltar para pendente?")) return;
-      const id = btn.getAttribute("data-id");
-      const trabalho = todosOsTrabalhos.find(t => t.id === id);
-      if (trabalho?.despesaId) {
-        await deleteDoc(doc(db, "usuarios", usuarioAtual.uid, "despesas", trabalho.despesaId));
-      }
-      await updateDoc(doc(db, "usuarios", usuarioAtual.uid, "trabalhosCompanheiros", id), {
-        statusPagamento: "pendente", dataPagamento: null, lancadoComoDespesa: false, despesaId: null
-      });
-      alert("Voltou para pendente!");
-      await buscarTrabalhos(usuarioAtual);
-    });
-  });
-
-  document.querySelectorAll(".btn-excluir-trabalho").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      if (!confirm("Excluir este registro?")) return;
-      const id = btn.getAttribute("data-id");
-      const trabalho = todosOsTrabalhos.find(t => t.id === id);
-      if (trabalho?.despesaId) {
-        await deleteDoc(doc(db, "usuarios", usuarioAtual.uid, "despesas", trabalho.despesaId));
-      }
-      await deleteDoc(doc(db, "usuarios", usuarioAtual.uid, "trabalhosCompanheiros", id));
-      alert("Registro excluído!");
-      await buscarTrabalhos(usuarioAtual);
-    });
-  });
-}
-
-function renderizarTrabalhos() {
-  listaPendentes.innerHTML = "";
-  listaPagos.innerHTML = "";
-
-  let totalPendente = 0, totalPago = 0;
-  const pesquisa = inputPesquisa.value.trim().toLowerCase();
-
-  const filtrados = todosOsTrabalhos.filter(t =>
-    (t.companheiroNome || "").toLowerCase().includes(pesquisa)
-  );
-
-  const pendentes = filtrados.filter(t => t.statusPagamento === "pendente")
-    .sort((a,b) => new Date(b.data) - new Date(a.data));
-
-  const pagos = filtrados.filter(t => t.statusPagamento === "pago")
-    .sort((a,b) => new Date(b.dataPagamento||"1900-01-01") - new Date(a.dataPagamento||"1900-01-01"));
-
-  if (pendentes.length === 0) {
-    listaPendentes.innerHTML = "<p>Nenhum pagamento pendente encontrado.</p>";
-  } else {
-    pendentes.forEach(t => {
-      totalPendente += Number(t.valor) || 0;
-      listaPendentes.appendChild(criarCardTrabalho(t));
-    });
-  }
-
-  if (pagos.length === 0) {
-    listaPagos.innerHTML = "<p>Nenhum pagamento realizado encontrado.</p>";
-  } else {
-    const details = document.createElement("details");
-    const summary = document.createElement("summary");
-    summary.textContent = `Ver pagamentos realizados (${pagos.length})`;
-    details.appendChild(summary);
-    pagos.forEach(t => {
-      totalPago += Number(t.valor) || 0;
-      details.appendChild(criarCardTrabalho(t));
-    });
-    listaPagos.appendChild(details);
-  }
-
-  totalPendenteEl.textContent = formatarMoeda(totalPendente);
-  totalPagoEl.textContent     = formatarMoeda(totalPago);
-
-  adicionarEventosBotoes();
-}
-
-function adicionarEventosExcluirCompanheiro() {
-  document.querySelectorAll(".btn-excluir-companheiro").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const id = btn.getAttribute("data-id");
-      const temTrabalho = todosOsTrabalhos.some(t => t.companheiroId === id);
-      if (temTrabalho) { alert("Não é possível excluir — companheiro possui trabalhos cadastrados."); return; }
-      if (!confirm("Excluir este companheiro?")) return;
-      await deleteDoc(doc(db, "usuarios", usuarioAtual.uid, "companheiros", id));
-      alert("Companheiro excluído!");
-      await carregarCompanheiros(usuarioAtual);
-    });
-  });
-}
-
-function adicionarEventosExcluirTurma() {
-  document.querySelectorAll(".btn-excluir-turma").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      if (!confirm("Excluir esta turma?")) return;
-      const id = btn.getAttribute("data-id");
-      await deleteDoc(doc(db, "usuarios", usuarioAtual.uid, "turmas", id));
-      alert("Turma excluída!");
-      await carregarTurmas(usuarioAtual);
-    });
-  });
-}
-
-// ── Lançar despesa ao pagar ───────────────────────────────────────────────────
+// ── Lançar despesa ────────────────────────────────────────────────────────────
 async function lancarDespesa(trabalho, dataPagamento) {
   const ref = await addDoc(collection(db, "usuarios", usuarioAtual.uid, "despesas"), {
     categoria: "Mão de Obra",
@@ -450,124 +205,274 @@ async function lancarDespesa(trabalho, dataPagamento) {
   return ref.id;
 }
 
+// ── Carregamento Firebase ─────────────────────────────────────────────────────
+async function carregarCompanheiros(user) {
+  todosOsCompanheiros = [];
+  const snap = await getDocs(collection(db, "usuarios", user.uid, "companheiros"));
+  snap.forEach(d => todosOsCompanheiros.push({ id: d.id, ...d.data() }));
+  renderizarCompanheiros();
+  renderizarCheckboxesTurma();
+  renderizarCheckboxesAvulso();
+}
+async function carregarTurmas(user) {
+  todasAsTurmas = [];
+  const snap = await getDocs(collection(db, "usuarios", user.uid, "turmas"));
+  snap.forEach(d => todasAsTurmas.push({ id: d.id, ...d.data() }));
+  renderizarTurmas();
+  atualizarSelectTurmas();
+}
+async function carregarMoitas(user) {
+  const sel = document.getElementById("moita-trabalho");
+  sel.innerHTML = '<option value="">Sem moita específica</option>';
+  const snap = await getDocs(collection(db, "usuarios", user.uid, "moitas"));
+  snap.forEach(d => {
+    const opt = document.createElement("option");
+    opt.value = d.id; opt.textContent = d.data().nome;
+    sel.appendChild(opt);
+  });
+}
+async function buscarTrabalhos(user) {
+  todosOsTrabalhos = [];
+  const snap = await getDocs(collection(db, "usuarios", user.uid, "trabalhosCompanheiros"));
+  snap.forEach(d => todosOsTrabalhos.push({ id: d.id, ...d.data() }));
+  renderizarTrabalhos();
+}
+
+// ── Renderizações ─────────────────────────────────────────────────────────────
+function renderizarCompanheiros() {
+  const lista = document.getElementById("lista-companheiros");
+  lista.innerHTML = todosOsCompanheiros.length === 0 ? "<p>Nenhum companheiro cadastrado.</p>" : "";
+  todosOsCompanheiros.forEach(c => {
+    const div = document.createElement("div");
+    div.className = "card-item";
+    div.innerHTML = `
+      <p><strong>Nome:</strong> ${c.nome}</p>
+      <p><strong>Chave Pix:</strong> ${c.pix || "-"}</p>
+      <button data-id="${c.id}" class="btn-excluir btn-excluir-companheiro">Excluir</button>`;
+    lista.appendChild(div);
+  });
+  document.querySelectorAll(".btn-excluir-companheiro").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const id = btn.getAttribute("data-id");
+      if (todosOsTrabalhos.some(t => t.companheiroId === id)) {
+        alert("Não é possível excluir — companheiro possui trabalhos cadastrados."); return;
+      }
+      if (!confirm("Excluir este companheiro?")) return;
+      await deleteDoc(doc(db, "usuarios", usuarioAtual.uid, "companheiros", id));
+      await carregarCompanheiros(usuarioAtual);
+    });
+  });
+}
+function renderizarCheckboxesTurma() {
+  const c = document.getElementById("checkboxes-turma");
+  c.innerHTML = todosOsCompanheiros.length === 0 ? "<p class='sem-itens'>Nenhum companheiro cadastrado.</p>" : "";
+  todosOsCompanheiros.forEach(comp => {
+    const label = document.createElement("label");
+    label.className = "checkbox-item";
+    label.innerHTML = `<input type="checkbox" class="cb-turma" value="${comp.id}" data-nome="${comp.nome}"> ${comp.nome}`;
+    c.appendChild(label);
+  });
+}
+function renderizarCheckboxesAvulso() {
+  const c = document.getElementById("companheiros-checkboxes");
+  c.innerHTML = "";
+  todosOsCompanheiros.forEach(comp => {
+    const label = document.createElement("label");
+    label.className = "checkbox-item";
+    label.innerHTML = `<input type="checkbox" class="cb-avulso" value="${comp.id}" data-nome="${comp.nome}" data-pix="${comp.pix||""}"> ${comp.nome}`;
+    c.appendChild(label);
+    label.querySelector("input").addEventListener("change", () => { atualizarResumoPresentes(); verificarFormulario(); });
+  });
+}
+function renderizarTurmas() {
+  const lista = document.getElementById("lista-turmas");
+  lista.innerHTML = todasAsTurmas.length === 0 ? "<p>Nenhuma turma cadastrada.</p>" : "";
+  todasAsTurmas.forEach(t => {
+    const div = document.createElement("div");
+    div.className = "card-item";
+    div.innerHTML = `
+      <p><strong>${t.nome}</strong> — ${t.membros.length} membro(s)</p>
+      <div class="tags">${t.membros.map(m=>`<span class="tag">${m.nome}</span>`).join("")}</div>
+      <button data-id="${t.id}" class="btn-excluir btn-excluir-turma">Excluir turma</button>`;
+    lista.appendChild(div);
+  });
+  document.querySelectorAll(".btn-excluir-turma").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      if (!confirm("Excluir esta turma?")) return;
+      await deleteDoc(doc(db, "usuarios", usuarioAtual.uid, "turmas", btn.getAttribute("data-id")));
+      await carregarTurmas(usuarioAtual);
+    });
+  });
+}
+function atualizarSelectTurmas() {
+  const sel = document.getElementById("select-turma");
+  sel.innerHTML = '<option value="">Nenhuma (mostrar todos)</option>';
+  todasAsTurmas.forEach(t => {
+    const opt = document.createElement("option");
+    opt.value = t.id; opt.textContent = t.nome;
+    sel.appendChild(opt);
+  });
+}
+
+// ── Trabalhos (pendentes / pagos com busca independente) ──────────────────────
+function renderizarTrabalhos() {
+  const pesquisaPendentes = (document.getElementById("pesquisa-pendentes")?.value || "").trim().toLowerCase();
+  const pesquisaPagos     = (document.getElementById("pesquisa-pagos")?.value || "").trim().toLowerCase();
+
+  const pendentes = todosOsTrabalhos
+    .filter(t => t.statusPagamento === "pendente" && (t.companheiroNome||"").toLowerCase().includes(pesquisaPendentes))
+    .sort((a,b) => new Date(b.data)-new Date(a.data));
+  const pagos = todosOsTrabalhos
+    .filter(t => t.statusPagamento === "pago" && (t.companheiroNome||"").toLowerCase().includes(pesquisaPagos))
+    .sort((a,b) => new Date(b.dataPagamento||"1900-01-01")-new Date(a.dataPagamento||"1900-01-01"));
+
+  let totalPendente = 0, totalPago = 0;
+  const lp = document.getElementById("lista-pendentes");
+  lp.innerHTML = pendentes.length === 0 ? "<p>Nenhum pagamento pendente.</p>" : "";
+  pendentes.forEach(t => { totalPendente += Number(t.valor)||0; lp.appendChild(criarCard(t)); });
+
+  const lpg = document.getElementById("lista-pagos");
+  lpg.innerHTML = pagos.length === 0 ? "<p>Nenhum pagamento realizado.</p>" : "";
+  pagos.forEach(t => { totalPago += Number(t.valor)||0; lpg.appendChild(criarCard(t)); });
+
+  document.getElementById("total-pendente").textContent = fmt(totalPendente);
+  document.getElementById("total-pago").textContent     = fmt(totalPago);
+  adicionarEventosBotoes();
+}
+window.renderizarTrabalhos = renderizarTrabalhos;
+
+function criarCard(t) {
+  const estaPago = t.statusPagamento === "pago";
+  const div = document.createElement("div");
+  div.className = "card-item";
+  div.innerHTML = `
+    <p><strong>Companheiro:</strong> ${t.companheiroNome}</p>
+    <p><strong>Chave Pix:</strong> ${t.companheiroTelefone || "-"}</p>
+    <p><strong>Moita:</strong> ${t.moitaNome || "Sem moita específica"}</p>
+    <p><strong>Data:</strong> ${fmtBR(t.data)}</p>
+    <p><strong>Serviço:</strong> ${t.servico}</p>
+    <p><strong>Tipo:</strong> ${t.tipoPagamento === "producao" ? "Produção" : "Diária"}</p>
+    <p><strong>Valor:</strong> ${fmt(t.valor)}</p>
+    <p><strong>Status:</strong> ${estaPago ? "✅ Pago" : "⏳ Pendente"}</p>
+    ${estaPago ? `<p><strong>Data pagamento:</strong> ${fmtBR(t.dataPagamento)}</p>` : ""}
+    ${!estaPago
+      ? `<button data-id="${t.id}" class="btn-marcar-pago">Marcar como pago</button>`
+      : `<button data-id="${t.id}" class="btn-voltar-pendente">Voltar para pendente</button>`}
+    <button data-id="${t.id}" class="btn-excluir btn-excluir-trabalho">Excluir</button>`;
+  return div;
+}
+function adicionarEventosBotoes() {
+  document.querySelectorAll(".btn-marcar-pago").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const id = btn.getAttribute("data-id");
+      const t  = todosOsTrabalhos.find(t => t.id === id);
+      if (!t) return;
+      if (t.lancadoComoDespesa || t.despesaId) { alert("Já lançado nas despesas."); return; }
+      const dataPag = hoje();
+      const despesaId = await lancarDespesa(t, dataPag);
+      await updateDoc(doc(db, "usuarios", usuarioAtual.uid, "trabalhosCompanheiros", id), {
+        statusPagamento: "pago", dataPagamento: dataPag, lancadoComoDespesa: true, despesaId
+      });
+      await buscarTrabalhos(usuarioAtual);
+    });
+  });
+  document.querySelectorAll(".btn-voltar-pendente").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      if (!confirm("Voltar para pendente?")) return;
+      const id = btn.getAttribute("data-id");
+      const t  = todosOsTrabalhos.find(t => t.id === id);
+      if (t?.despesaId) await deleteDoc(doc(db, "usuarios", usuarioAtual.uid, "despesas", t.despesaId));
+      await updateDoc(doc(db, "usuarios", usuarioAtual.uid, "trabalhosCompanheiros", id), {
+        statusPagamento: "pendente", dataPagamento: null, lancadoComoDespesa: false, despesaId: null
+      });
+      await buscarTrabalhos(usuarioAtual);
+    });
+  });
+  document.querySelectorAll(".btn-excluir-trabalho").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      if (!confirm("Excluir este registro?")) return;
+      const id = btn.getAttribute("data-id");
+      const t  = todosOsTrabalhos.find(t => t.id === id);
+      if (t?.despesaId) await deleteDoc(doc(db, "usuarios", usuarioAtual.uid, "despesas", t.despesaId));
+      await deleteDoc(doc(db, "usuarios", usuarioAtual.uid, "trabalhosCompanheiros", id));
+      await buscarTrabalhos(usuarioAtual);
+    });
+  });
+}
+
 // ── Formulários ───────────────────────────────────────────────────────────────
-formCompanheiro.addEventListener("submit", async (e) => {
+document.getElementById("cadastro-companheiro-form").addEventListener("submit", async e => {
   e.preventDefault();
   const nome = document.getElementById("nome-companheiro").value.trim();
   const pix  = document.getElementById("pix-companheiro").value.trim();
-  await addDoc(collection(db, "usuarios", usuarioAtual.uid, "companheiros"), {
-    nome, pix: pix || null, criadoEm: new Date()
-  });
-  alert("Companheiro cadastrado!");
-  formCompanheiro.reset();
+  await addDoc(collection(db, "usuarios", usuarioAtual.uid, "companheiros"), { nome, pix: pix||null, criadoEm: new Date() });
+  e.target.reset();
+  fecharModal("modal-cadastro");
   await carregarCompanheiros(usuarioAtual);
 });
-
-formTurma.addEventListener("submit", async (e) => {
+document.getElementById("criar-turma-form").addEventListener("submit", async e => {
   e.preventDefault();
   const nome = document.getElementById("nome-turma").value.trim();
   const selecionados = [...document.querySelectorAll(".cb-turma:checked")];
-  if (selecionados.length === 0) { alert("Selecione pelo menos um companheiro."); return; }
-
+  if (!selecionados.length) { alert("Selecione pelo menos um companheiro."); return; }
   const membros = selecionados.map(cb => ({ id: cb.value, nome: cb.getAttribute("data-nome") }));
-  await addDoc(collection(db, "usuarios", usuarioAtual.uid, "turmas"), {
-    nome, membros, criadoEm: new Date()
-  });
-  alert(`Turma "${nome}" criada!`);
-  formTurma.reset();
+  await addDoc(collection(db, "usuarios", usuarioAtual.uid, "turmas"), { nome, membros, criadoEm: new Date() });
+  e.target.reset();
   document.querySelectorAll(".cb-turma").forEach(cb => cb.checked = false);
+  fecharModal("modal-turma");
   await carregarTurmas(usuarioAtual);
 });
-
-formTrabalho.addEventListener("submit", async (e) => {
+document.getElementById("registro-trabalho-form").addEventListener("submit", async e => {
   e.preventDefault();
-
-  const avulsos  = [...document.querySelectorAll(".cb-avulso:checked")];
-  const presentes = [...document.querySelectorAll(".cb-presenca:checked")];
-  const selecionados = avulsos.length > 0 ? avulsos : presentes;
-
-  if (selecionados.length === 0) { alert("Selecione pelo menos um companheiro ou turma."); return; }
-
-  const moitaId   = selectMoita.value;
-  const moitaNome = moitaId ? selectMoita.options[selectMoita.selectedIndex].text : null;
-  const data      = document.getElementById("data-trabalho").value;
-  const servico   = document.getElementById("servico-trabalho").value.trim();
-  const tipo      = document.getElementById("tipo-pagamento").value;
-  const status    = document.getElementById("status-pagamento").value;
-  const dataPagamento = status === "pago" ? obterDataHoje() : null;
-
-  let valor = 0;
-  if (tipo === "diaria") {
-    valor = parseFloat(document.getElementById("valor-trabalho").value);
-    if (!valor) { alert("Digite o valor."); return; }
-  } else {
-    const qtd   = parseFloat(document.getElementById("quantidade-producao").value);
-    const preco = parseFloat(document.getElementById("preco-producao").value);
-    if (!qtd)   { alert("Digite a quantidade."); return; }
-    if (!preco) { alert("Digite o preço por produção."); return; }
-    valor = qtd * preco;
-  }
-
+  const selecionados = [...document.querySelectorAll(".cb-avulso:checked")];
+  if (!selecionados.length) { alert("Selecione pelo menos um companheiro."); return; }
+  const data    = document.getElementById("data-trabalho").value;
+  const servico = document.getElementById("servico-trabalho").value.trim();
+  const moitaId = document.getElementById("moita-trabalho").value;
+  const moitaNome = moitaId ? document.getElementById("moita-trabalho").options[document.getElementById("moita-trabalho").selectedIndex].text : null;
+  const status  = document.getElementById("status-pagamento").value;
+  const dataPagamento = status === "pago" ? hoje() : null;
+  const valor   = parseFloat(document.getElementById("valor-trabalho").value);
+  if (!valor) { alert("Digite o valor."); return; }
   for (const cb of selecionados) {
     const trabalhoBase = {
-      companheiroId: cb.value,
-      companheiroNome: cb.getAttribute("data-nome"),
+      companheiroId: cb.value, companheiroNome: cb.getAttribute("data-nome"),
       companheiroTelefone: cb.getAttribute("data-pix") || null,
-      moitaId: moitaId || null, moitaNome: moitaNome || null,
-      data, servico, valor, tipoPagamento: tipo,
+      moitaId: moitaId||null, moitaNome: moitaNome||null,
+      data, servico, valor, tipoPagamento: "diaria",
       statusPagamento: status, dataPagamento,
-      lancadoComoDespesa: false, despesaId: null,
-      criadoEm: new Date()
+      lancadoComoDespesa: false, despesaId: null, criadoEm: new Date()
     };
-
-    const ref = await addDoc(
-      collection(db, "usuarios", usuarioAtual.uid, "trabalhosCompanheiros"),
-      trabalhoBase
-    );
-
+    const ref = await addDoc(collection(db, "usuarios", usuarioAtual.uid, "trabalhosCompanheiros"), trabalhoBase);
     if (status === "pago") {
       const despesaId = await lancarDespesa(trabalhoBase, dataPagamento);
-      await updateDoc(doc(db, "usuarios", usuarioAtual.uid, "trabalhosCompanheiros", ref.id), {
-        lancadoComoDespesa: true, despesaId
-      });
+      await updateDoc(doc(db, "usuarios", usuarioAtual.uid, "trabalhosCompanheiros", ref.id), { lancadoComoDespesa: true, despesaId });
     }
   }
-
-  alert(`Trabalho registrado para ${selecionados.length} companheiro(s)!`);
-  formTrabalho.reset();
-  document.querySelectorAll(".cb-avulso, .cb-presenca").forEach(cb => cb.checked = false);
+  e.target.reset();
+  document.querySelectorAll(".cb-avulso").forEach(cb => cb.checked = false);
   document.getElementById("resumo-selecionados").textContent = "Nenhum selecionado.";
-  document.getElementById("presenca-container").style.display = "none";
-  document.getElementById("preview-producao").style.display = "none";
+  document.getElementById("select-turma").value = "";
+  fecharModal("modal-trabalho");
   await buscarTrabalhos(usuarioAtual);
 });
-
-inputPesquisa.addEventListener("input", renderizarTrabalhos);
+document.getElementById("btn-abrir-selecao").addEventListener("click", () => abrirModal("modal-selecao"));
 
 // ── Início ────────────────────────────────────────────────────────────────────
-(async function iniciarCompanheiros() {
+(async function iniciar() {
   try {
     const resultado = await exigirUsuarioAprovado();
     if (!resultado) return;
-
     const plano = resultado.dados?.acesso?.plano || "basico";
     if (plano !== "completo") {
       alert("Seu plano não tem acesso a esta página.\nFaça upgrade para o plano Completo!");
-      window.location.href = "index.html";
-      return;
+      window.location.href = "index.html"; return;
     }
-
     usuarioAtual = resultado.user;
-
-    await Promise.all([
-      carregarCompanheiros(usuarioAtual),
-      carregarTurmas(usuarioAtual),
-      carregarMoitas(usuarioAtual)
-    ]);
+    await Promise.all([carregarCompanheiros(usuarioAtual), carregarTurmas(usuarioAtual), carregarMoitas(usuarioAtual)]);
     await buscarTrabalhos(usuarioAtual);
-
   } catch (erro) {
-    console.error("Erro ao iniciar página de companheiros:", erro);
+    console.error("Erro:", erro);
     window.location.href = "index.html";
   }
 })();
