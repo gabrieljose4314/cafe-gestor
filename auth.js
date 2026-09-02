@@ -23,16 +23,20 @@ provider.setCustomParameters({
 
 const btnLogin = document.getElementById("login-btn");
 
-const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-
 // PWA instalado (modo "standalone") quebra o signInWithPopup: a popup abre,
 // mas o resultado não volta pra página que a abriu. iOS usa navigator.standalone,
 // os demais usam a media query display-mode.
+//
+// Navegador comum de celular (Chrome/Safari, não instalado) NÃO tem esse
+// problema — popup funciona normalmente, igual no computador. Testado e
+// confirmado: forçar redirect também nesse caso (baseado só em "é celular")
+// foi o que causava o login travar sem erro nenhum visível. Por isso aqui só
+// olha se é PWA instalado, não se é celular.
 const isStandalonePWA =
   window.matchMedia("(display-mode: standalone)").matches ||
   window.navigator.standalone === true;
 
-const precisaDeRedirect = isMobile || isStandalonePWA;
+const precisaDeRedirect = isStandalonePWA;
 
 async function fazerLoginComGoogle() {
   try {
