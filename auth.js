@@ -3,8 +3,6 @@ import { auth, db } from "./firebase.js";
 import {
   GoogleAuthProvider,
   signInWithPopup,
-  signInWithRedirect,
-  getRedirectResult,
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
 
@@ -23,28 +21,16 @@ provider.setCustomParameters({
 
 const btnLogin = document.getElementById("login-btn");
 
-// PWA instalado (modo "standalone") quebra o signInWithPopup: a popup abre,
-// mas o resultado não volta pra página que a abriu. iOS usa navigator.standalone,
-// os demais usam a media query display-mode.
-//
-// Navegador comum de celular (Chrome/Safari, não instalado) NÃO tem esse
-// problema — popup funciona normalmente, igual no computador. Testado e
-// confirmado: forçar redirect também nesse caso (baseado só em "é celular")
-// foi o que causava o login travar sem erro nenhum visível. Por isso aqui só
-// olha se é PWA instalado, não se é celular.
-const isStandalonePWA =
-  window.matchMedia("(display-mode: standalone)").matches ||
-  window.navigator.standalone === true;
-
-const precisaDeRedirect = isStandalonePWA;
-
+// Voltado a usar SÓ signInWithPopup, sem nenhuma detecção de mobile/PWA.
+// Uma versão anterior deste arquivo (antes da remodelagem visual) já
+// funcionava assim, inclusive dentro do app instalado — a lógica de
+// signInWithRedirect que existiu aqui por um tempo foi o que estava
+// causando o login travar (o retorno do redirect não completava direito
+// dentro do PWA instalado no Android). Não reintroduzir isso sem motivo
+// concreto e testado.
 async function fazerLoginComGoogle() {
   try {
-    if (precisaDeRedirect) {
-      await signInWithRedirect(auth, provider);
-    } else {
-      await signInWithPopup(auth, provider);
-    }
+    await signInWithPopup(auth, provider);
   } catch (error) {
     console.error("Erro no login:", error);
     alert("Erro ao entrar com Google. Tente novamente.");
@@ -105,19 +91,6 @@ async function redirecionarUsuario(acesso) {
 
 if (btnLogin) {
   btnLogin.addEventListener("click", fazerLoginComGoogle);
-}
-
-// Captura o resultado do redirect (mobile ou PWA instalado)
-if (precisaDeRedirect) {
-  getRedirectResult(auth)
-    .then(async (result) => {
-      if (!result) return;
-      const acesso = await criarUsuarioSeNaoExistir(result.user);
-      await redirecionarUsuario(acesso);
-    })
-    .catch((error) => {
-      console.error("Erro no redirect:", error);
-    });
 }
 
 onAuthStateChanged(auth, async (user) => {
