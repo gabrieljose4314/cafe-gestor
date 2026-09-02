@@ -25,9 +25,18 @@ const btnLogin = document.getElementById("login-btn");
 
 const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
+// PWA instalado (modo "standalone") quebra o signInWithPopup: a popup abre,
+// mas o resultado não volta pra página que a abriu. iOS usa navigator.standalone,
+// os demais usam a media query display-mode.
+const isStandalonePWA =
+  window.matchMedia("(display-mode: standalone)").matches ||
+  window.navigator.standalone === true;
+
+const precisaDeRedirect = isMobile || isStandalonePWA;
+
 async function fazerLoginComGoogle() {
   try {
-    if (isMobile) {
+    if (precisaDeRedirect) {
       await signInWithRedirect(auth, provider);
     } else {
       await signInWithPopup(auth, provider);
@@ -94,8 +103,8 @@ if (btnLogin) {
   btnLogin.addEventListener("click", fazerLoginComGoogle);
 }
 
-// Captura o resultado do redirect no mobile
-if (isMobile) {
+// Captura o resultado do redirect (mobile ou PWA instalado)
+if (precisaDeRedirect) {
   getRedirectResult(auth)
     .then(async (result) => {
       if (!result) return;
