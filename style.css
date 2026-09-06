@@ -174,6 +174,50 @@ summary {
     border-color: #bca88a;
 }
 
+/* Submenu do menu mobile (ex: Companheiros > Cadastrar / Turmas / ...) —
+   um <details> aninhado dentro do <li>, reaproveitando o mesmo visual. */
+.menu .submenu-mobile > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #fff;
+    padding: 10px 14px;
+    border: 1px solid #d3c6b3;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #2d4a2b;
+}
+.menu .submenu-mobile > summary::after {
+    content: "▾";
+    font-size: 0.75rem;
+    color: #8a7a5c;
+    margin-left: 10px;
+}
+.menu .submenu-mobile[open] > summary {
+    border-radius: 8px 8px 0 0;
+    border-bottom: none;
+}
+.menu .submenu-mobile ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 8px;
+    background-color: #f3ede2;
+    border: 1px solid #d3c6b3;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+}
+.menu .submenu-mobile ul li {
+    margin-bottom: 8px;
+}
+.menu .submenu-mobile ul li:last-child {
+    margin-bottom: 0;
+}
+.menu .submenu-mobile ul li a {
+    display: block;
+    font-size: 0.92rem;
+    padding: 8px 12px;
+}
+
 li a {
     text-decoration: none;
     color: #2d4a2b;
@@ -668,6 +712,96 @@ button:hover {
 .btn-excluir-moita:hover {
     background-color: #9b0d18;
 }
+.card-compra {
+    background-color: #fcfaf7;
+    border: 1px solid #e0d3c0;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 10px;
+    transition: 0.2s ease;
+}
+
+.card-compra:hover {
+    box-shadow: 0 3px 10px rgba(80, 60, 30, 0.10);
+}
+
+.card-compra p {
+    margin-bottom: 0.4rem;
+}
+
+.btn-excluir-compra {
+    background-color: #c1121f;
+    color: #fff;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.btn-excluir-compra:hover {
+    background-color: #9b0d18;
+}
+
+.card-lote {
+    background-color: #fcfaf7;
+    border: 1px solid #e0d3c0;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 10px;
+    transition: 0.2s ease;
+}
+
+.card-lote:hover {
+    box-shadow: 0 3px 10px rgba(80, 60, 30, 0.10);
+}
+
+.card-lote p {
+    margin-bottom: 0.4rem;
+}
+
+.btn-editar-lote {
+    background-color: #bc6c25;
+    color: #fff;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-right: 8px;
+}
+
+.btn-editar-lote:hover {
+    background-color: #9a571c;
+}
+
+.btn-excluir-lote {
+    background-color: #c1121f;
+    color: #fff;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.btn-excluir-lote:hover {
+    background-color: #9b0d18;
+}
+
+.tag-origem {
+    display: inline-block;
+    background-color: #bc6c25;
+    color: #fff;
+    font-size: 0.7rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 20px;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+.texto-ajuda {
+    font-size: 0.85rem;
+    color: #7a6f60;
+    margin-top: 0.8rem;
+}
 .card-admin-usuario {
     background-color: #fcfaf7;
     border: 1px solid #e0d3c0;
@@ -723,6 +857,32 @@ button:hover {
         margin-right: 0;
     }
 }
+/* =========================================================================
+   ÍCONES SVG (substituem os emojis) — usados no menu lateral desktop E nos
+   botões de ação (que aparecem tanto no mobile quanto no desktop), por
+   isso ficam aqui fora de qualquer @media, valendo pra tela toda.
+========================================================================= */
+.icone-menu {
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
+.icone-menu svg {
+    width: 20px;
+    height: 20px;
+    display: block;
+}
+
+.icone-marca svg {
+    width: 24px;
+    height: 24px;
+}
+
+.icone-aviso svg {
+    width: 18px;
+    height: 18px;
+}
+
 /* =========================
    BOTÕES DE AÇÃO (menu principal por botões)
 ========================= */
@@ -732,32 +892,33 @@ button:hover {
     gap: 0.8rem;
 }
 .btn-acao {
-    background-color: #2d4a2b;
-    color: #fff;
-    padding: 0.9rem 1.4rem;
-    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #fcfaf7;
+    color: #3a3025;
+    padding: 0.85rem 1.3rem;
+    border: 1px solid #e0d3c0;
     border-radius: 10px;
     cursor: pointer;
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: bold;
     transition: 0.2s ease, transform 0.15s ease;
-    box-shadow: 0 2px 6px rgba(80, 60, 30, 0.15);
+    box-shadow: 0 2px 6px rgba(80, 60, 30, 0.06);
+}
+.btn-acao .icone-menu {
+    color: #2d4a2b;
 }
 .btn-acao:hover {
-    background-color: #21371f;
+    border-color: #bca88a;
+    box-shadow: 0 4px 12px rgba(80, 60, 30, 0.12);
     transform: translateY(-2px);
 }
-.btn-acao.marrom {
-    background-color: #6f4e37;
+.btn-acao.marrom .icone-menu {
+    color: #6f4e37;
 }
-.btn-acao.marrom:hover {
-    background-color: #5a3f2d;
-}
-.btn-acao.teal {
-    background-color: #2a9d8f;
-}
-.btn-acao.teal:hover {
-    background-color: #21867a;
+.btn-acao.teal .icone-menu {
+    color: #2a9d8f;
 }
 
 /* =========================
@@ -1030,6 +1191,19 @@ button:hover {
     background-color: #fff;
     box-shadow: 0 0 0 3px rgba(45, 74, 43, 0.15);
 }
+
+/* Quando o campo de busca mora dentro de uma <form> (ex: Registrar
+   Trabalho, cuja página inteira é um <form> só), a regra antiga
+   "form input[type=text] { padding: 0.7rem }" (mais específica que só
+   ".campo-busca") comia o padding-esquerdo reservado pro ícone da lupa —
+   o texto digitado nascia embaixo dela. Essa aqui tem especificidade maior
+   que as duas (mais um seletor de atributo) e garante o respiro do ícone
+   em qualquer contexto, com ou sem form ao redor, em qualquer tamanho de
+   tela (não é só um ajuste de desktop).  */
+input.campo-busca[type="text"] {
+    padding: 0.7rem 1rem 0.7rem 2.4rem;
+}
+
 /* =========================
    RESPONSIVO — modais/botões
 ========================= */
@@ -1146,4 +1320,567 @@ button:hover {
     font-weight: normal;
     color: #8a7a63;
     font-size: 0.85rem;
+}
+
+/* =========================================================================
+   MENU LATERAL (sidebar) — visual único pras duas telas.
+   No celular ele funciona como "drawer": fica fixo na tela inteira só que
+   deslocado pra fora (transform translateX), e desliza pra dentro quando
+   o usuário toca no hamburguer do topbar mobile (função alternarMenuMobile,
+   duplicada em menu.js/script.js igual o resto do site). A partir de 901px
+   (@media mais abaixo) ele vira a sidebar fixa de sempre ao lado do
+   conteúdo — só a POSIÇÃO muda entre as telas, marca/links/submenu são
+   exatamente os mesmos, de propósito: é isso que faz o celular ficar
+   fiel ao desktop.
+========================================================================= */
+.topbar-desktop,
+.pagina-lista-desktop {
+    display: none;
+}
+
+.sidebar-desktop {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 280px;
+    max-width: 82vw;
+    background: linear-gradient(180deg, #23361f, #16220f);
+    color: #f2ede3;
+    padding: 1.5rem 0;
+    z-index: 1101;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    overflow-y: auto;
+}
+
+.sidebar-desktop.aberta {
+    transform: translateX(0);
+}
+
+/* Fundo escurecido atrás do drawer aberto no celular — toca nele pra fechar. */
+.overlay-menu-mobile {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 1100;
+}
+
+.overlay-menu-mobile.visivel {
+    display: block;
+}
+
+.sidebar-marca {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #fff;
+    padding: 0 1.5rem 1.5rem;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* "X" de fechar o drawer — só existe/aparece no celular (ver @media 901px).
+   width:auto sobrescreve a regra antiga "button { width:100% }" que existe
+   pra telas ≤768px (feita pros botões de formulário, não pra esse). */
+.btn-fechar-menu-mobile {
+    width: auto;
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: #d8d0c0;
+    cursor: pointer;
+    display: flex;
+    padding: 0.2rem;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 0 0.8rem;
+}
+
+.sidebar-nav a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    color: #d8d0c0;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: 0.15s ease;
+}
+
+.sidebar-nav a:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+.sidebar-nav a.ativo {
+    background-color: #bc6c25;
+    color: #fff;
+    font-weight: bold;
+}
+
+/* Item expansível da sidebar (Companheiros/Turmas), com submenu de
+   sub-páginas — mesmo mecanismo visual do menu "Vendas > Reembolsos"
+   usado como referência. */
+.sidebar-nav-toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    color: #d8d0c0;
+    background: none;
+    border: none;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: 0.15s ease;
+}
+
+.sidebar-nav-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+.sidebar-item-expansivel.ativo > .sidebar-nav-toggle {
+    background-color: #bc6c25;
+    color: #fff;
+    font-weight: bold;
+}
+
+.icone-chevron {
+    margin-left: auto;
+    display: flex;
+    transition: transform 0.2s ease;
+}
+
+.sidebar-item-expansivel.aberto .icone-chevron {
+    transform: rotate(90deg);
+}
+
+.sidebar-submenu {
+    display: none;
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px 0 4px 2.2rem;
+}
+
+.sidebar-item-expansivel.aberto .sidebar-submenu {
+    display: flex;
+}
+
+.sidebar-submenu a {
+    padding: 0.55rem 0.8rem;
+    border-radius: 6px;
+    color: #b9b0a0;
+    text-decoration: none;
+    font-size: 0.88rem;
+    transition: 0.15s ease;
+}
+
+.sidebar-submenu a:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+.sidebar-submenu a.ativo {
+    background-color: rgba(188, 108, 37, 0.4);
+    color: #fff;
+    font-weight: bold;
+}
+
+/* Usuário (avatar + nome + Sair) dentro do drawer — só aparece no celular.
+   No desktop essa informação já mora na topbar (".topbar-usuario" lá
+   embaixo), então esse bloco fica escondido a partir de 901px. */
+.sidebar-usuario-mobile {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 1rem 1.5rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.sidebar-usuario-mobile .avatar-usuario {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.sidebar-usuario-mobile .nome-usuario-mobile {
+    flex: 1;
+    font-size: 0.9rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sidebar-usuario-mobile .btn-logout-topbar {
+    width: auto;
+    background-color: rgba(0, 0, 0, 0.2);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 0.4rem 0.7rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+/* =========================================================================
+   TOPBAR COMPACTO DO CELULAR — hamburguer + marca "CaféGestor" (a mesma da
+   sidebar) + título da página. Some a partir de 901px, onde quem cuida da
+   navegação é a sidebar fixa + a topbar-desktop (mais abaixo).
+========================================================================= */
+.topbar-mobile {
+    padding: 0.9rem 1.2rem 1rem;
+}
+
+.topbar-mobile-linha {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+}
+
+.btn-hamburguer {
+    width: auto;
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    padding: 0.2rem;
+    flex-shrink: 0;
+}
+
+.topbar-mobile-marca {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.15rem;
+    font-weight: bold;
+}
+
+.topbar-mobile-titulo {
+    margin-top: 0.6rem;
+    font-size: 1rem;
+    font-weight: normal;
+    opacity: 0.95;
+}
+
+@media (min-width: 901px) {
+
+    body:has(.sidebar-desktop) {
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        grid-template-rows: auto 1fr;
+        grid-template-areas:
+            "sidebar topbar"
+            "sidebar main";
+        min-height: 100vh;
+        align-items: start;
+    }
+
+    /* No desktop, o topbar/drawer do celular somem — quem cuida da
+       navegação e do usuário é a sidebar fixa + a .topbar-desktop. */
+    .topbar-mobile,
+    .overlay-menu-mobile,
+    .sidebar-usuario-mobile,
+    .btn-fechar-menu-mobile {
+        display: none !important;
+    }
+
+    .sidebar-desktop {
+        grid-area: sidebar;
+        position: sticky;
+        top: 0;
+        left: auto;
+        height: auto;
+        min-height: 100vh;
+        width: auto;
+        max-width: none;
+        z-index: auto;
+        transform: none;
+        transition: none;
+    }
+
+    .topbar-desktop {
+        display: block;
+        grid-area: topbar;
+        background: linear-gradient(135deg, #2d4a2b, #3d5c3a);
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .topbar-aviso {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background-color: #f4c542;
+        color: #4a3a00;
+        padding: 0.6rem 1.5rem;
+        font-size: 0.9rem;
+        font-weight: bold;
+    }
+
+    /* .oculto vem antes no arquivo com a mesma especificidade — sem isso
+       aqui, o aviso apareceria mesmo escondido. */
+    .topbar-aviso.oculto {
+        display: none;
+    }
+
+    .btn-acao.oculto {
+        display: none;
+    }
+
+    .topbar-linha {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.1rem 1.5rem;
+    }
+
+    .topbar-titulo {
+        font-size: 1.3rem;
+        font-weight: bold;
+    }
+
+    .topbar-titulo-grupo {
+        display: flex;
+        align-items: center;
+        gap: 1.1rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-acao-topbar {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background-color: rgba(255, 255, 255, 0.12);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: 0.2s ease;
+    }
+    .btn-acao-topbar:hover {
+        background-color: rgba(255, 255, 255, 0.22);
+    }
+    .btn-acao-topbar .icone-menu {
+        color: #8fd9c9;
+    }
+
+    .topbar-usuario {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 0.95rem;
+    }
+
+    .avatar-usuario {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+
+    .btn-logout-topbar {
+        background-color: rgba(0, 0, 0, 0.2);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+
+    .btn-logout-topbar:hover {
+        background-color: rgba(0, 0, 0, 0.35);
+    }
+
+    body:has(.sidebar-desktop) > main {
+        grid-area: main;
+        max-width: none;
+        margin: 0;
+        padding: 2rem;
+    }
+
+    /* Grid de cards do Dashboard — em vez de deixar o navegador decidir
+       quantas colunas cabem (o que sobrava espaço vazio quando o total de
+       cards não era múltiplo do que coubesse por linha), fixa 3 colunas.
+       Com os 6 cards de hoje fecha certinho em 2 linhas de 3. */
+    body:has(.sidebar-desktop) .display-painel {
+        grid-template-columns: repeat(3, 1fr);
+        max-width: 1100px;
+        margin: 0;
+    }
+
+    .linha-acao-relatorio {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    /* =====================================================================
+       PÁGINA DE LISTA NOVA (desktop) — protótipo feito primeiro em Vendas.
+       Substitui os botões "Cadastrar / Ver" + modal por tudo já visível na
+       tela: formulário de cadastro sempre aberto, cards de resumo e a
+       tabela com busca. No celular continua tudo como era (botões + modal)
+       — ver ".secao-acoes-mobile" abaixo.
+    ===================================================================== */
+    .secao-acoes-mobile {
+        display: none;
+    }
+
+    .pagina-lista-desktop {
+        display: flex;
+        flex-direction: column;
+        gap: 1.2rem;
+    }
+
+    .stats-lista {
+        display: grid;
+        /* auto-fit em vez de repeat(2,...) fixo: com 1 card só (Companheiros,
+           Turmas) ele preenche a largura toda em vez de deixar a segunda
+           coluna vazia e o card parecendo quebrado pela metade. Com 2 cards
+           (Moitas, Estoque etc.) continua lado a lado igual antes. */
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+        max-width: 600px;
+    }
+
+    .form-inline-lista {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 1rem;
+    }
+
+    .campo-form-lista {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        min-width: 170px;
+    }
+
+    .campo-form-lista label {
+        font-weight: bold;
+        color: #4a3728;
+        font-size: 0.85rem;
+    }
+
+    .campo-form-lista input,
+    .campo-form-lista select {
+        padding: 0.65rem;
+        border: 1px solid #cdbda7;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        background-color: #fcfaf7;
+    }
+
+    .campo-form-lista input:focus,
+    .campo-form-lista select:focus {
+        outline: none;
+        border-color: #2d4a2b;
+        background-color: #fff;
+        box-shadow: 0 0 0 3px rgba(45, 74, 43, 0.15);
+    }
+
+    .btn-primario-lista {
+        background-color: #2d4a2b;
+        color: #fff;
+        border: none;
+        padding: 0.7rem 1.5rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 0.95rem;
+        transition: 0.2s ease;
+    }
+
+    .btn-primario-lista:hover {
+        background-color: #21371f;
+    }
+
+    .card-tabela-lista .campo-busca {
+        margin-bottom: 1rem;
+        max-width: 340px;
+    }
+
+    .tabela-scroll {
+        overflow-x: auto;
+    }
+
+    .tabela-dados {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+    }
+
+    .tabela-dados thead th {
+        text-align: left;
+        padding: 0.7rem 0.8rem;
+        background-color: #f8f3eb;
+        color: #6f4e37;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        border-bottom: 2px solid #e6dccd;
+        white-space: nowrap;
+    }
+
+    .tabela-dados tbody td {
+        padding: 0.7rem 0.8rem;
+        border-bottom: 1px solid #f0e9dd;
+    }
+
+    .tabela-dados tbody tr:hover {
+        background-color: #faf7f2;
+    }
+
+    .tabela-dados tbody tr.linha-oculta {
+        display: none;
+    }
+
+    .btn-excluir-tabela {
+        background: none;
+        border: none;
+        color: #c1121f;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: bold;
+        padding: 0.2rem 0.4rem;
+    }
+
+    .btn-excluir-tabela:hover {
+        text-decoration: underline;
+    }
+
+    .tabela-vazio td {
+        color: #8a7a63;
+        font-style: italic;
+    }
 }

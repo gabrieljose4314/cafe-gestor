@@ -7,9 +7,9 @@
     <link rel="icon" type="image/png" href="./img/logo-192.png">
     <link rel="apple-touch-icon" href="./img/logo-192.png">
     <meta name="theme-color" content="#2d4a2b">
-    <title>Gerenciamento de Vendas</title>
+    <title>Monitoramento de Pagamentos</title>
     <link rel="stylesheet" href="style.css?v=1.10">
-    <script type="module" src="vendas.js?v=1.9"></script>
+    <script type="module" src="companheiros-pagamentos.js?v=1.1"></script>
     <script type="module" src="menu.js?v=1.7"></script>
 </head>
 <body>
@@ -23,7 +23,7 @@
                 CaféGestor
             </div>
         </div>
-        <h2 class="topbar-mobile-titulo">Gerenciamento de Vendas</h2>
+        <h2 class="topbar-mobile-titulo">Monitoramento de Pagamentos</h2>
     </header>
 
     <div class="overlay-menu-mobile" onclick="fecharMenuMobile()"></div>
@@ -61,7 +61,7 @@
                 </div>
             </div>
             <a href="colheita.html"><span class="icone-menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h16l-2 10H6L4 10Z"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span> Colheita</a>
-            <a href="vendas.html" class="ativo"><span class="icone-menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 5"/><polyline points="15 5 21 5 21 11"/></svg></span> Vendas</a>
+            <a href="vendas.html"><span class="icone-menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 5"/><polyline points="15 5 21 5 21 11"/></svg></span> Vendas</a>
             <a href="compras.html"><span class="icone-menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M3 4h2l2.4 12h11.2l2-8H7"/></svg></span> Compras</a>
             <a href="estoque.html"><span class="icone-menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="1.5"/><path d="M3 7l2-4h14l2 4"/><line x1="9" y1="12" x2="15" y2="12"/></svg></span> Estoque</a>
             <a href="historico.html"><span class="icone-menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/></svg></span> Histórico</a>
@@ -79,7 +79,7 @@
             <span>Complete seu cadastro para liberar todos os recursos</span>
         </div>
         <div class="topbar-linha">
-            <h2 class="topbar-titulo">Gerenciamento de Vendas</h2>
+            <h2 class="topbar-titulo">Monitoramento de Pagamentos</h2>
             <div class="topbar-usuario">
                 <div class="avatar-usuario" id="avatarUsuarioDesktop">U</div>
                 <span id="nomeUsuarioDesktop">Carregando...</span>
@@ -89,110 +89,28 @@
     </header>
 
     <main>
-        <!-- Botões antigos : só aparecem no celular. No desktop a tela de
-             baixo (form + resumo + tabela sempre visíveis) assume o lugar
-             deles, sem precisar abrir modal. -->
-        <section class="secao-acoes-mobile">
-            <div class="acoes-principais">
-                <button class="btn-acao" onclick="abrirModal('modal-venda')">💰 Registrar Venda</button>
-                <button class="btn-acao marrom" onclick="abrirModal('modal-ver-vendas')">📋 Ver Vendas Registradas</button>
+        <section class="stats-lista" style="display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;max-width:600px;margin:0 auto 1rem;">
+            <div class="painel-card">
+                <h3>Total pendente</h3>
+                <p id="total-pendente">R$ 0,00</p>
+            </div>
+            <div class="painel-card">
+                <h3>Total pago</h3>
+                <p id="total-pago">R$ 0,00</p>
             </div>
         </section>
 
-        <!-- ═══════════════════════════════════════════════════════════════
-             LAYOUT DESKTOP NOVO: protótipo, só telas >= 901px (ver
-             style.css). Sem modal: formulário sempre aberto + resumo +
-             tabela com busca, tudo na própria tela.
-        ═══════════════════════════════════════════════════════════════ -->
-        <div class="pagina-lista-desktop">
-            <section class="card-form-lista">
-                <h3 id="titulo-form-venda-desktop">Registrar Venda</h3>
-                <form id="form-venda-desktop" class="form-inline-lista">
-                    <div class="campo-form-lista">
-                        <label for="moita-vendas-desktop">Moita</label>
-                        <select id="moita-vendas-desktop">
-                            <option value="">Sem moita específica</option>
-                        </select>
-                    </div>
-                    <div class="campo-form-lista">
-                        <label for="data-venda-desktop">Data da Venda</label>
-                        <input type="date" id="data-venda-desktop" required>
-                    </div>
-                    <div class="campo-form-lista">
-                        <label for="quantidade-vendida-desktop">Quantidade (sacas)</label>
-                        <input type="number" id="quantidade-vendida-desktop" step="0.01" required>
-                    </div>
-                    <div class="campo-form-lista">
-                        <label for="preco-unitario-desktop">Preço por Saca (R$)</label>
-                        <input type="number" id="preco-unitario-desktop" step="0.01" required>
-                    </div>
-                    <button type="submit" id="btn-salvar-venda-desktop" class="btn-primario-lista">Registrar Venda</button>
-                    <button type="button" id="btn-cancelar-venda-desktop" class="btn-acao oculto">Cancelar edição</button>
-                </form>
-            </section>
+        <section>
+            <h3>⏳ Pendentes de Pagamento</h3>
+            <input type="text" id="pesquisa-pendentes" class="campo-busca" placeholder="Pesquisar por nome" oninput="renderizarTrabalhos()">
+            <div id="lista-pendentes"><p>Nenhum pagamento pendente.</p></div>
+        </section>
 
-            <section class="stats-lista">
-                <div class="painel-card">
-                    <h3>Vendas Registradas</h3>
-                    <p id="total-vendas-desktop">0</p>
-                </div>
-                <div class="painel-card">
-                    <h3>Valor Total</h3>
-                    <p id="valor-total-vendas-desktop">R$ 0,00</p>
-                </div>
-            </section>
-
-            <section class="card-tabela-lista">
-                <h3>Vendas Registradas</h3>
-                <input type="text" id="pesquisa-venda-desktop" class="campo-busca" placeholder="Pesquisar por moita">
-                <div class="tabela-scroll">
-                    <table class="tabela-dados">
-                        <thead>
-                            <tr>
-                                <th>Data</th>
-                                <th>Moita</th>
-                                <th>Quantidade</th>
-                                <th>Preço/saca</th>
-                                <th>Valor total</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabela-vendas-corpo"></tbody>
-                    </table>
-                </div>
-            </section>
-        </div>
+        <section>
+            <h3>✅ Pagamentos Realizados</h3>
+            <input type="text" id="pesquisa-pagos" class="campo-busca" placeholder="Pesquisar por nome" oninput="renderizarTrabalhos()">
+            <div id="lista-pagos"><p>Nenhum pagamento realizado.</p></div>
+        </section>
     </main>
-
-    <!-- MODAL: REGISTRAR / EDITAR VENDA -->
-    <div class="modal-overlay" id="modal-venda">
-        <div class="modal-box">
-            <button class="modal-fechar" onclick="fecharModalVenda()">✕</button>
-            <h3 id="titulo-modal-venda">💰 Registrar Venda</h3>
-            <form id="gerenciamento-vendas-form">
-                <label for="moita-vendas">Moita:</label>
-                <select id="moita-vendas" name="moita-vendas">
-                    <option value="">Sem moita específica</option>
-                </select><br><br>
-                <label for="data-venda">Data da Venda:</label>
-                <input type="date" id="data-venda" name="data-venda" required><br><br>
-                <label for="quantidade-vendida">Quantidade Vendida (sacas):</label>
-                <input type="number" id="quantidade-vendida" name="quantidade-vendida" step="0.01" required><br><br>
-                <label for="preco-unitario">Preço por Saca (R$):</label>
-                <input type="number" id="preco-unitario" name="preco-unitario" step="0.01" required><br><br>
-                <button type="submit" id="btn-salvar-venda">Registrar Venda</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL: VER VENDAS REGISTRADAS -->
-    <div class="modal-overlay" id="modal-ver-vendas">
-        <div class="modal-box">
-            <button class="modal-fechar" onclick="fecharModal('modal-ver-vendas')">✕</button>
-            <h3>📋 Vendas Registradas</h3>
-            <input type="text" id="pesquisa-venda" class="campo-busca" placeholder="Pesquisar por moita" oninput="filtrarVendas()">
-            <div id="lista-vendas"></div>
-        </div>
-    </div>
 </body>
 </html>

@@ -10,41 +10,89 @@
 <meta name="theme-color" content="#2d4a2b">
     <title>Painel de Gestão de Café</title>
 
-    <link rel="stylesheet" href="style.css">
-    <script type="module" src="script.js?v=1.6" defer></script>
+    <link rel="stylesheet" href="style.css?v=1.10">
+    <script type="module" src="script.js?v=1.9" defer></script>
 </head>
 
 <body>
-    <header>
-        <nav>
-            <h1>Painel de Gestão de Café</h1>
-            <hr>
-            <h2 class="titulo">Painel Geral</h2>
-        </nav>
+    <header class="topbar-mobile">
+        <div class="topbar-mobile-linha">
+            <button type="button" class="btn-hamburguer" onclick="alternarMenuMobile()" aria-label="Abrir menu">
+                <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+            <div class="topbar-mobile-marca">
+                <span class="icone-menu icone-marca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V8Z"/><path d="M17 9.5h1.5a2.3 2.3 0 0 1 0 4.6H17"/><path d="M8 5c0-.8.8-.8.8-1.6M11.5 5c0-.8.8-.8.8-1.6M15 5c0-.8.8-.8.8-1.6"/></svg></span>
+                CaféGestor
+            </div>
+        </div>
+        <h2 class="topbar-mobile-titulo">Painel Geral</h2>
     </header>
 
-    <section class="menu">
-        <div class="usuario">
-            <h2 id="nomeUsuario"></h2>
-            <button id="logout">Sair</button>
-        </div>
+    <div class="overlay-menu-mobile" onclick="fecharMenuMobile()"></div>
 
-        <details>
-            <summary>
-                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
-                    <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
-                </svg>
-            </summary>
-<ul>
-    <li><a href="moitas.html">Gerenciamento de Moitas</a></li>
-    <li><a href="despesas.html">Gerenciamento de Despesas</a></li>
-    <li><a href="companheiros.html">Gerenciamento de Companheiros</a></li>
-    <li><a href="colheita.html">Gerenciamento de Colheita</a></li>
-    <li><a href="vendas.html">Gerenciamento de Vendas</a></li>
-    <li><a href="historico.html">Histórico de Movimentações</a></li>
-</ul>
-        </details>
-    </section>
+    <!-- ═══════════════════════════════════════════════════════════════════
+         SIDEBAR: serve pras duas telas: no celular é o drawer que abre
+         pelo hamburguer do topbar mobile lá em cima; a partir de 901px
+         (ver style.css, bloco "@media (min-width: 901px)") ela vira a
+         sidebar fixa de sempre ao lado do conteúdo, e a topbar-desktop
+         (com título da página + usuário) assume no lugar do topbar mobile.
+    ═══════════════════════════════════════════════════════════════════ -->
+    <aside class="sidebar-desktop">
+        <div class="sidebar-marca">
+            <span class="icone-menu icone-marca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V8Z"/><path d="M17 9.5h1.5a2.3 2.3 0 0 1 0 4.6H17"/><path d="M8 5c0-.8.8-.8.8-1.6M11.5 5c0-.8.8-.8.8-1.6M15 5c0-.8.8-.8.8-1.6"/></svg></span>
+            CaféGestor
+            <button type="button" class="btn-fechar-menu-mobile" onclick="fecharMenuMobile()" aria-label="Fechar menu">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="index.html" class="ativo"><span class="icone-menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span> Dashboard</a>
+            <a href="moitas.html"><span class="icone-menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V11"/><path d="M12 11C9 11 7 9 7 5C10 5 12 8 12 11"/><path d="M12 11C15 11 17 9 17 5C14 5 12 8 12 11"/></svg></span> Moitas</a>
+            <a href="despesas.html"><span class="icone-menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/></svg></span> Despesas</a>
+            <div class="sidebar-item-expansivel">
+                <button type="button" class="sidebar-nav-toggle" onclick="alternarSubmenuSidebar(this)">
+                    <span class="icone-menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.5 2.5-6 6-6s6 2.5 6 6"/><circle cx="17" cy="9" r="2.3"/><path d="M15.5 20c0-2.7 1.7-4.8 3.8-5.2"/></svg></span>
+                    Companheiros/Turmas
+                    <span class="icone-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+                </button>
+                <div class="sidebar-submenu">
+                    <a href="companheiros-cadastro.html">Cadastrar Companheiro</a>
+                    <a href="companheiros-turmas.html">Turmas</a>
+                    <a href="companheiros-trabalho.html">Registrar Trabalho</a>
+                    <a href="companheiros-pagamentos.html">Monitoramento de Pagamentos</a>
+                </div>
+            </div>
+            <a href="colheita.html"><span class="icone-menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h16l-2 10H6L4 10Z"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span> Colheita</a>
+            <a href="vendas.html"><span class="icone-menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 5"/><polyline points="15 5 21 5 21 11"/></svg></span> Vendas</a>
+            <a href="compras.html"><span class="icone-menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M3 4h2l2.4 12h11.2l2-8H7"/></svg></span> Compras</a>
+            <a href="estoque.html"><span class="icone-menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="1.5"/><path d="M3 7l2-4h14l2 4"/><line x1="9" y1="12" x2="15" y2="12"/></svg></span> Estoque</a>
+            <a href="historico.html"><span class="icone-menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/></svg></span> Histórico</a>
+        </nav>
+        <div class="sidebar-usuario-mobile">
+            <div class="avatar-usuario" id="avatarUsuarioMobile">U</div>
+            <span class="nome-usuario-mobile" id="nomeUsuarioMobile">Carregando...</span>
+            <button id="logout-mobile" class="btn-logout-topbar">Sair</button>
+        </div>
+    </aside>
+
+    <header class="topbar-desktop">
+        <!-- Faixa de aviso : vem escondida (mesmo padrão de "esconder sem
+             apagar" usado no resto do projeto). Dá pra usar depois pra
+             avisos tipo "complete seu cadastro" ou "atualize seu plano",
+             só tirar a classe "oculto" e trocar o texto. -->
+        <div class="topbar-aviso oculto">
+            <span class="icone-menu icone-aviso"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3L2 20h20L12 3Z"/><line x1="12" y1="9" x2="12" y2="13.5"/><circle cx="12" cy="16.5" r="0.6" fill="currentColor" stroke="none"/></svg></span>
+            <span>Complete seu cadastro para liberar todos os recursos</span>
+        </div>
+        <div class="topbar-linha">
+            <h2 class="topbar-titulo">Dashboard</h2>
+            <div class="topbar-usuario">
+                <div class="avatar-usuario" id="avatarUsuarioDesktop">U</div>
+                <span id="nomeUsuarioDesktop">Carregando...</span>
+                <button id="logout-desktop" class="btn-logout-topbar">Sair</button>
+            </div>
+        </div>
+    </header>
 
     <main>
         <section class="display-painel">

@@ -1,9 +1,34 @@
 import { db } from "./firebase.js";
-import { exigirUsuarioAprovado } from "./acesso.js";
+import { exigirUsuarioAprovado, ativarTopbarDesktop } from "./acesso.js";
 import {
   collection,
   getDocs
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+
+// ── Sidebar desktop: item expansível "Companheiros/Turmas" ─────────────────
+window.alternarSubmenuSidebar = function (btn) {
+  const item = btn.closest(".sidebar-item-expansivel");
+  if (item) item.classList.toggle("aberto");
+};
+document.querySelectorAll(".sidebar-submenu a").forEach(a => {
+  const href = a.getAttribute("href");
+  if (href && location.pathname.endsWith(href)) {
+    a.classList.add("ativo");
+    const item = a.closest(".sidebar-item-expansivel");
+    if (item) item.classList.add("aberto", "ativo");
+  }
+});
+
+// ── Drawer mobile : a mesma sidebar agora serve pras duas telas ────────────
+window.alternarMenuMobile = function () {
+  document.querySelector(".sidebar-desktop")?.classList.toggle("aberta");
+  document.querySelector(".overlay-menu-mobile")?.classList.toggle("visivel");
+};
+
+window.fecharMenuMobile = function () {
+  document.querySelector(".sidebar-desktop")?.classList.remove("aberta");
+  document.querySelector(".overlay-menu-mobile")?.classList.remove("visivel");
+};
 
 const listaHistorico = document.getElementById("lista-historico");
 const inputPesquisa  = document.getElementById("pesquisa-historico");
@@ -200,6 +225,7 @@ async function carregarHistorico(user) {
   try {
     const resultado = await exigirUsuarioAprovado();
     if (!resultado) return;
+  ativarTopbarDesktop(resultado.dados?.dados?.nome);
     const plano = resultado.dados?.acesso?.plano || "basico";
     if (plano !== "completo") {
       alert("Seu plano não tem acesso a esta página.\nFaça upgrade para o plano Completo!");

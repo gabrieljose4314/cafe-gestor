@@ -1,9 +1,5 @@
-import { auth, db } from "./firebase.js";
-import { exigirUsuarioAprovado } from "./acesso.js";
-
-import {
-  signOut
-} from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+import { db } from "./firebase.js";
+import { exigirUsuarioAprovado, ativarTopbarDesktop } from "./acesso.js";
 
 // LINKS ARRUMADOS: Importando o collection, getDocs, doc e getDoc da mesma biblioteca oficial
 import {
@@ -13,7 +9,6 @@ import {
   getDoc
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
-const botaoLogout = document.getElementById("logout");
 const botaoDetalhes = document.getElementById("toggle-detalhes-despesas");
 const detalhesDespesas = document.getElementById("detalhes-despesas");
 
@@ -36,8 +31,11 @@ function formatarSacas(valor) {
 }
 
 async function carregarDadosUsuario(dados) {
-  document.getElementById("nomeUsuario").textContent =
-    "Bem-vindo, " + dados.dados.nome;
+  const nome = dados.dados.nome || "";
+
+  // Preenche a topbar (desktop) e o drawer (celular) : função compartilhada
+  // em acesso.js, usada em todas as páginas do site.
+  ativarTopbarDesktop(nome);
 }
 
 async function carregarResumoFinanceiro(user) {
@@ -167,26 +165,41 @@ async function carregarResumoFinanceiro(user) {
 
 // Função que remove o que não pertence ao plano básico
 function esconderAbasRestritas() {
-  const paginasBloqueadas = [ "companheiros.html", "historico.html"];
-  
-  paginasBloqueadas.forEach(pagina => {
-    const link = document.querySelector(`a[href="${pagina}"]`);
-    if (link) {
-      const itemMenu = link.closest("li");
-      if (itemMenu) {
-        itemMenu.style.setProperty("display", "none", "important");
-      }
-    }
-  });
+  // Histórico é exclusivo do plano completo : esconde o link direto na
+  // sidebar/drawer (ele agora é um <a> solto, sem <li> ao redor).
+  const linkHistorico = document.querySelector('.sidebar-nav > a[href="historico.html"]');
+  if (linkHistorico) linkHistorico.style.setProperty("display", "none", "important");
+
+  // Sidebar desktop: o item "Companheiros/Turmas" agora é um botão que abre
+  // um submenu (não é mais um <a href="companheiros.html"> direto).
+  const itemExpansivel = document.querySelector(".sidebar-item-expansivel");
+  if (itemExpansivel) itemExpansivel.style.setProperty("display", "none", "important");
 }
 
+// ── Sidebar desktop: item expansível "Companheiros/Turmas" ─────────────────
+window.alternarSubmenuSidebar = function (btn) {
+  const item = btn.closest(".sidebar-item-expansivel");
+  if (item) item.classList.toggle("aberto");
+};
+document.querySelectorAll(".sidebar-submenu a").forEach(a => {
+  const href = a.getAttribute("href");
+  if (href && location.pathname.endsWith(href)) {
+    a.classList.add("ativo");
+    const item = a.closest(".sidebar-item-expansivel");
+    if (item) item.classList.add("aberto", "ativo");
+  }
+});
 
-if (botaoLogout) {
-  botaoLogout.addEventListener("click", async () => {
-    await signOut(auth);
-    window.location.href = "login.html";
-  });
-}
+// ── Drawer mobile : a mesma sidebar agora serve pras duas telas ────────────
+window.alternarMenuMobile = function () {
+  document.querySelector(".sidebar-desktop")?.classList.toggle("aberta");
+  document.querySelector(".overlay-menu-mobile")?.classList.toggle("visivel");
+};
+
+window.fecharMenuMobile = function () {
+  document.querySelector(".sidebar-desktop")?.classList.remove("aberta");
+  document.querySelector(".overlay-menu-mobile")?.classList.remove("visivel");
+};
 
 if (botaoDetalhes && detalhesDespesas) {
   botaoDetalhes.addEventListener("click", () => {

@@ -1,5 +1,5 @@
 import { db } from "./firebase.js";
-import { exigirUsuarioAprovado } from "./acesso.js";
+import { exigirUsuarioAprovado, ativarTopbarDesktop } from "./acesso.js";
 import {
   collection, addDoc, getDocs,
   doc, updateDoc, deleteDoc
@@ -463,6 +463,7 @@ document.getElementById("btn-abrir-selecao").addEventListener("click", () => abr
   try {
     const resultado = await exigirUsuarioAprovado();
     if (!resultado) return;
+  ativarTopbarDesktop(resultado.dados?.dados?.nome);
     const plano = resultado.dados?.acesso?.plano || "basico";
     if (plano !== "completo") {
       alert("Seu plano não tem acesso a esta página.\nFaça upgrade para o plano Completo!");

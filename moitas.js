@@ -1,5 +1,5 @@
 import { db } from "./firebase.js";
-import { exigirUsuarioAprovado } from "./acesso.js";
+import { exigirUsuarioAprovado, ativarTopbarDesktop } from "./acesso.js";
 import {
   collection,
   addDoc,
@@ -14,6 +14,17 @@ const listaMoitas = document.getElementById("lista-moitas");
 const listaProducao = document.getElementById("lista-producao");
 const botaoSalvar = document.getElementById("btn-salvar-moita");
 const tituloModal = document.getElementById("titulo-modal-moita");
+
+// Elementos do layout desktop novo — checagem defensiva. O Relatório de
+// Produção continua em modal (não migrou), só o cadastro+listagem simples
+// ganhou o layout sem modal.
+const formMoitaDesktop = document.getElementById("form-moita-desktop");
+const botaoSalvarDesktop = document.getElementById("btn-salvar-moita-desktop");
+const botaoCancelarMoitaDesktop = document.getElementById("btn-cancelar-moita-desktop");
+const tabelaMoitasCorpo = document.getElementById("tabela-moitas-corpo");
+const totalMoitasDesktopEl = document.getElementById("total-moitas-desktop");
+const areaTotalMoitasDesktopEl = document.getElementById("area-total-moitas-desktop");
+const pesquisaMoitaDesktop = document.getElementById("pesquisa-moita-desktop");
 
 let usuarioAtual = null;
 let moitaEmEdicaoId = null;
@@ -72,6 +83,7 @@ function limparFormulario() {
   moitaEmEdicaoId = null;
   botaoSalvar.textContent = "Cadastrar Moita";
   tituloModal.textContent = "🌱 Cadastrar Moita";
+  limparFormularioDesktop();
 }
 function preencherFormulario(moita) {
   document.getElementById("nome-moita").value = moita.nome || "";
@@ -79,6 +91,28 @@ function preencherFormulario(moita) {
   document.getElementById("quantidade-de-pes").value = moita.pes || "";
   document.getElementById("tipo-de-cafe").value = moita.tipo || "";
 }
+
+// Layout desktop novo — form sempre visível na tela, "editar" só troca
+// o modo do form no lugar (sem abrir modal).
+function limparFormularioDesktop() {
+  if (!formMoitaDesktop) return;
+  formMoitaDesktop.reset();
+  if (botaoSalvarDesktop) botaoSalvarDesktop.textContent = "Cadastrar Moita";
+  if (botaoCancelarMoitaDesktop) botaoCancelarMoitaDesktop.classList.add("oculto");
+}
+function preencherFormularioDesktop(moita) {
+  document.getElementById("nome-moita-desktop").value = moita.nome || "";
+  document.getElementById("area-moita-desktop").value = moita.area || "";
+  document.getElementById("quantidade-de-pes-desktop").value = moita.pes || "";
+  document.getElementById("tipo-de-cafe-desktop").value = moita.tipo || "";
+}
+if (botaoCancelarMoitaDesktop) {
+  botaoCancelarMoitaDesktop.addEventListener("click", () => {
+    moitaEmEdicaoId = null;
+    limparFormularioDesktop();
+  });
+}
+
 function criarCardMoita(moita) {
   const div = document.createElement("div");
   div.classList.add("card-moita");
@@ -103,6 +137,16 @@ window.filtrarMoitas = function() {
   });
 };
 
+if (pesquisaMoitaDesktop) {
+  pesquisaMoitaDesktop.addEventListener("input", () => {
+    const termo = pesquisaMoitaDesktop.value.trim().toLowerCase();
+    document.querySelectorAll("#tabela-moitas-corpo tr[data-nome]").forEach((linha) => {
+      const nome = linha.getAttribute("data-nome") || "";
+      linha.classList.toggle("linha-oculta", !nome.includes(termo));
+    });
+  });
+}
+
 // ── Busca: Relatório de Produção ───────────────────────────────────────────────
 window.filtrarRelatorio = function() {
   const termo = document.getElementById("pesquisa-relatorio").value.trim().toLowerCase();
@@ -112,28 +156,67 @@ window.filtrarRelatorio = function() {
   });
 };
 
+// ── Linha da tabela (desktop) ────────────────────────────────────────────────
+function criarLinhaMoita(moita) {
+  const tr = document.createElement("tr");
+  tr.setAttribute("data-nome", (moita.nome || "").toLowerCase());
+  tr.innerHTML = `
+    <td>${moita.nome}</td>
+    <td>${formatarNumero(moita.area)} ha</td>
+    <td>${formatarNumero(moita.pes, 0)}</td>
+    <td>${moita.tipo || "-"}</td>
+    <td>
+      <button class="btn-excluir-tabela btn-editar-moita-desktop" data-id="${moita.id}">Editar</button>
+      <button class="btn-excluir-tabela btn-excluir-moita" data-id="${moita.id}">Excluir</button>
+    </td>
+  `;
+  return tr;
+}
+
 // ── Listagem: Moitas cadastradas (CRUD) ────────────────────────────────────────
 async function listarMoitas(user) {
   try {
     listaMoitas.innerHTML = "";
+    if (tabelaMoitasCorpo) tabelaMoitasCorpo.innerHTML = "";
     todasAsMoitas = [];
+
     const snapshot = await getDocs(collection(db, "usuarios", user.uid, "moitas"));
+
     if (snapshot.empty) {
       listaMoitas.innerHTML = "<p>Nenhuma moita cadastrada.</p>";
+      if (tabelaMoitasCorpo) {
+        tabelaMoitasCorpo.innerHTML = '<tr class="tabela-vazio"><td colspan="5">Nenhuma moita cadastrada.</td></tr>';
+      }
+      if (totalMoitasDesktopEl) totalMoitasDesktopEl.textContent = "0";
+      if (areaTotalMoitasDesktopEl) areaTotalMoitasDesktopEl.textContent = "0 ha";
       return;
     }
+
     snapshot.forEach((documento) => {
       todasAsMoitas.push({ id: documento.id, ...documento.data() });
     });
     todasAsMoitas.sort((a, b) => a.nome.localeCompare(b.nome));
+
+    let areaTotalGeral = 0;
+
     todasAsMoitas.forEach((moita) => {
       listaMoitas.appendChild(criarCardMoita(moita));
+      if (tabelaMoitasCorpo) tabelaMoitasCorpo.appendChild(criarLinhaMoita(moita));
+      areaTotalGeral += Number(moita.area) || 0;
     });
+
+    if (totalMoitasDesktopEl) totalMoitasDesktopEl.textContent = todasAsMoitas.length;
+    if (areaTotalMoitasDesktopEl) areaTotalMoitasDesktopEl.textContent = `${formatarNumero(areaTotalGeral)} ha`;
+
     adicionarEventosEditar();
+    adicionarEventosEditarDesktop();
     adicionarEventosExcluir();
   } catch (erro) {
     console.error("Erro ao listar moitas:", erro);
     listaMoitas.innerHTML = "<p>Erro ao carregar moitas.</p>";
+    if (tabelaMoitasCorpo) {
+      tabelaMoitasCorpo.innerHTML = '<tr class="tabela-vazio"><td colspan="5">Erro ao carregar moitas.</td></tr>';
+    }
   }
 }
 function adicionarEventosEditar() {
@@ -148,6 +231,20 @@ function adicionarEventosEditar() {
       tituloModal.textContent = "✏️ Editar Moita";
       window.fecharModal("modal-ver-moitas");
       window.abrirModal("modal-moita");
+    });
+  });
+}
+function adicionarEventosEditarDesktop() {
+  document.querySelectorAll(".btn-editar-moita-desktop").forEach((botao) => {
+    botao.addEventListener("click", () => {
+      const id = botao.getAttribute("data-id");
+      const moita = todasAsMoitas.find((item) => item.id === id);
+      if (!moita || !formMoitaDesktop) return;
+      moitaEmEdicaoId = id;
+      preencherFormularioDesktop(moita);
+      if (botaoSalvarDesktop) botaoSalvarDesktop.textContent = "Atualizar Moita";
+      if (botaoCancelarMoitaDesktop) botaoCancelarMoitaDesktop.classList.remove("oculto");
+      formMoitaDesktop.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   });
 }
@@ -263,6 +360,7 @@ window.abrirModalRelatorio = async function() {
 (async function iniciar() {
   const resultado = await exigirUsuarioAprovado();
   if (!resultado) return;
+  ativarTopbarDesktop(resultado.dados?.dados?.nome);
   const infoUsuario = resultado.dados;
   if (infoUsuario && infoUsuario.acesso && infoUsuario.acesso.plano === "basico") {
     const elHistorico = document.getElementById("historico") || document.getElementById("historico-moitas");
@@ -305,3 +403,39 @@ form.addEventListener("submit", async (e) => {
     alert("Erro ao salvar moita");
   }
 });
+
+// Formulário do layout desktop novo — mesma lógica de cadastro/edição,
+// sem modal.
+if (formMoitaDesktop) {
+  formMoitaDesktop.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!usuarioAtual) {
+      alert("Usuário não autenticado");
+      return;
+    }
+    const nome = document.getElementById("nome-moita-desktop").value;
+    const area = document.getElementById("area-moita-desktop").value;
+    const pes  = document.getElementById("quantidade-de-pes-desktop").value;
+    const tipo = document.getElementById("tipo-de-cafe-desktop").value;
+    try {
+      if (moitaEmEdicaoId) {
+        await updateDoc(doc(db, "usuarios", usuarioAtual.uid, "moitas", moitaEmEdicaoId), {
+          nome, area: Number(area), pes: Number(pes), tipo
+        });
+        alert("Moita atualizada com sucesso!");
+      } else {
+        await addDoc(collection(db, "usuarios", usuarioAtual.uid, "moitas"), {
+          nome, area: Number(area), pes: Number(pes), tipo, dataCriacao: new Date()
+        });
+        alert("Moita cadastrada com sucesso!");
+      }
+      moitaEmEdicaoId = null;
+      limparFormularioDesktop();
+      await listarMoitas(usuarioAtual);
+      relatorioCarregado = false;
+    } catch (erro) {
+      console.error("Erro ao salvar moita:", erro);
+      alert("Erro ao salvar moita");
+    }
+  });
+}
